@@ -46,6 +46,14 @@ export interface QueryWithDetails extends Query {
   execution?: {
     execution_time_seconds?: number;
   };
+  response_count?: number;
+  workflow_name?: string;
+  workflow_category?: string;
+  workflow_icon?: string;
+  consensus_level?: string;
+  agreeing_providers?: string[];
+  conflicting_providers?: string[];
+  execution_time_seconds?: number;
 }
 
 export interface HistoryFilters {
