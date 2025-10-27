@@ -138,7 +138,7 @@ export async function queryGemini(input: QueryInput): Promise<LLMResponse> {
       throw new Error('GOOGLE_AI_API_KEY not configured');
     }
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
 
     const systemPrompt = input.systemPrompt || 'You are a helpful biotech research assistant.';
     const fullPrompt = `${systemPrompt}\n\n${input.queryText}\n\nProvide your analysis with a confidence score (0-100) at the end. Include specific citations (PMID, NCT numbers) when referencing papers or trials.`;
@@ -150,7 +150,7 @@ export async function queryGemini(input: QueryInput): Promise<LLMResponse> {
 
     return {
       provider: 'gemini',
-      model: 'gemini-1.5-flash',
+      model: 'gemini-2.0-flash-exp',
       responseText,
       confidenceScore: extractConfidence(responseText),
       sources: extractSources(responseText),
@@ -164,7 +164,7 @@ export async function queryGemini(input: QueryInput): Promise<LLMResponse> {
 
     return {
       provider: 'gemini',
-      model: 'gemini-1.5-flash',
+      model: 'gemini-2.0-flash-exp',
       responseText: '',
       responseTimeMs: Date.now() - startTime,
       error: errorMsg,
