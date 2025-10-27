@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 
 interface LLMResponse {
@@ -20,7 +20,7 @@ interface Workflow {
   system_prompt?: string;
 }
 
-export default function QueryPage() {
+function QueryPageContent() {
   const searchParams = useSearchParams();
   const workflowId = searchParams?.get('workflow');
 
@@ -374,5 +374,23 @@ export default function QueryPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function QueryPage() {
+  return (
+    <Suspense fallback={
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-200 rounded w-1/4 mb-8"></div>
+          <div className="bg-white rounded-lg border border-gray-200 p-6 mb-8">
+            <div className="h-4 bg-gray-200 rounded w-1/3 mb-4"></div>
+            <div className="h-32 bg-gray-200 rounded mb-4"></div>
+          </div>
+        </div>
+      </div>
+    }>
+      <QueryPageContent />
+    </Suspense>
   );
 }
