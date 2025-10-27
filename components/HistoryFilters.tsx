@@ -194,12 +194,12 @@ export default function HistoryFilters({ filters, onFilterChange, onSearch }: Hi
           <div>
             <h3 className="text-sm font-medium text-gray-700 mb-3">Consensus Level</h3>
             <div className="flex flex-wrap gap-2">
-              {[
+              {([
                 { label: 'High', value: 'high', icon: '✅' },
                 { label: 'Medium', value: 'medium', icon: '⚠️' },
                 { label: 'Low', value: 'low', icon: '❌' },
                 { label: 'None', value: 'none', icon: '❔' },
-              ].map((level) => (
+              ] as const).map((level) => (
                 <button
                   key={level.value}
                   onClick={() => handleToggleFilter('consensusLevels', level.value)}
@@ -219,12 +219,12 @@ export default function HistoryFilters({ filters, onFilterChange, onSearch }: Hi
           <div>
             <h3 className="text-sm font-medium text-gray-700 mb-3">LLM Provider</h3>
             <div className="flex flex-wrap gap-2">
-              {[
+              {([
                 { label: 'Claude', value: 'claude' },
                 { label: 'OpenAI', value: 'openai' },
                 { label: 'Gemini', value: 'gemini' },
                 { label: 'Grok', value: 'grok' },
-              ].map((provider) => (
+              ] as const).map((provider) => (
                 <button
                   key={provider.value}
                   onClick={() => handleToggleFilter('llmProviders', provider.value)}
@@ -244,11 +244,11 @@ export default function HistoryFilters({ filters, onFilterChange, onSearch }: Hi
           <div>
             <h3 className="text-sm font-medium text-gray-700 mb-3">Status</h3>
             <div className="flex flex-wrap gap-2">
-              {[
+              {([
                 { label: 'Completed', value: 'completed' },
                 { label: 'Processing', value: 'processing' },
                 { label: 'Failed', value: 'failed' },
-              ].map((status) => (
+              ] as const).map((status) => (
                 <button
                   key={status.value}
                   onClick={() => handleToggleFilter('status', status.value)}
