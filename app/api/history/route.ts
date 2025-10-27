@@ -92,7 +92,7 @@ export async function GET(request: NextRequest) {
 
     // Count total matching records
     const countQuery = queryText.replace(
-      /SELECT.*FROM queries/s,
+      /SELECT[\s\S]*?FROM queries/,
       'SELECT COUNT(DISTINCT q.id) as total FROM queries'
     );
     const countResult = await query(countQuery, params);
