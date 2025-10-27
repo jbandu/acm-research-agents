@@ -4,10 +4,10 @@ import { query } from '@/lib/db';
 // GET /api/history/[id] - Get full query details with all responses
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     // Get query details
     const queryResult = await query(
@@ -73,10 +73,10 @@ export async function GET(
 // DELETE /api/history/[id] - Delete query and all associated data
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     // ON DELETE CASCADE will handle related records
     const result = await query(

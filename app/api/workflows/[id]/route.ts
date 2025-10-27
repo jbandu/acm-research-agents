@@ -4,10 +4,10 @@ import { query } from '@/lib/db';
 // GET /api/workflows/[id] - Get workflow details
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     const result = await query(
       `SELECT
@@ -56,10 +56,10 @@ export async function GET(
 // PUT /api/workflows/[id] - Update custom workflow
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
     const {
       name,
@@ -118,10 +118,10 @@ export async function PUT(
 // DELETE /api/workflows/[id] - Delete custom workflow
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     const result = await query(
       'DELETE FROM workflows WHERE id = $1 AND is_template = false RETURNING id',

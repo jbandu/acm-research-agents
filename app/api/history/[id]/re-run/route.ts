@@ -5,10 +5,10 @@ import { queryAllLLMs } from '@/lib/llm-clients';
 // POST /api/history/[id]/re-run - Re-execute an old query
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id: originalQueryId } = params;
+    const { id: originalQueryId } = await params;
 
     // Get original query details
     const originalQueryResult = await query(

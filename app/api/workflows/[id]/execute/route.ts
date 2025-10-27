@@ -5,10 +5,10 @@ import { queryAllLLMs } from '@/lib/llm-clients';
 // POST /api/workflows/[id]/execute - Execute workflow with parameters
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id: workflowId } = params;
+    const { id: workflowId } = await params;
     const body = await request.json();
     const { parameters, query_text, created_by } = body;
 
