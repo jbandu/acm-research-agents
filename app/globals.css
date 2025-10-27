@@ -1,0 +1,48 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* app/globals.css */
+@import "tailwindcss";
+
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+  }
+
+  body {
+    @apply bg-gray-50 text-gray-900;
+  }
+}
+
+@layer components {
+  .llm-card {
+    @apply rounded-lg border p-6 bg-white shadow-sm hover:shadow-md transition-shadow;
+  }
+
+  .llm-card-claude {
+    @apply border-claude;
+  }
+
+  .llm-card-openai {
+    @apply border-openai;
+  }
+
+  .llm-card-gemini {
+    @apply border-gemini;
+  }
+
+  .llm-card-grok {
+    @apply border-grok;
+  }
+
+  .btn-primary {
+    @apply px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium;
+  }
+
+  .btn-secondary {
+    @apply px-6 py-3 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors font-medium;
+  }
+}
