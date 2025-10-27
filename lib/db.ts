@@ -11,7 +11,12 @@ export function getPool(): Pool {
       },
       max: 20,
       idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 2000,
+      connectionTimeoutMillis: 10000, // Increased to 10 seconds for Neon cold starts
+    });
+
+    // Add error handler to prevent unhandled rejections
+    pool.on('error', (err) => {
+      console.error('Unexpected pool error:', err);
     });
   }
   return pool;

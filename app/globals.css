@@ -1,10 +1,15 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-/* app/globals.css */
 @import "tailwindcss";
 
+@theme {
+  --color-claude: #4F46E5;
+  --color-claude-light: #6366F1;
+  --color-openai: #10A37F;
+  --color-openai-light: #1A9675;
+  --color-gemini: #DC2626;
+  --color-gemini-light: #EF4444;
+  --color-grok: #8B5CF6;
+  --color-grok-light: #A78BFA;
+}
 
 @layer base {
   :root {
@@ -23,19 +28,19 @@
   }
 
   .llm-card-claude {
-    @apply border-claude;
+    @apply border-2 border-claude;
   }
 
   .llm-card-openai {
-    @apply border-openai;
+    @apply border-2 border-openai;
   }
 
   .llm-card-gemini {
-    @apply border-gemini;
+    @apply border-2 border-gemini;
   }
 
   .llm-card-grok {
-    @apply border-grok;
+    @apply border-2 border-grok;
   }
 
   .btn-primary {
