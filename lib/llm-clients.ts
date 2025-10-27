@@ -134,8 +134,12 @@ export async function queryOpenAI(input: QueryInput): Promise<LLMResponse> {
 export async function queryGemini(input: QueryInput): Promise<LLMResponse> {
   const startTime = Date.now();
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
-    
+    if (!process.env.GOOGLE_AI_API_KEY) {
+      throw new Error('GOOGLE_AI_API_KEY not configured');
+    }
+
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+
     const systemPrompt = input.systemPrompt || 'You are a helpful biotech research assistant.';
     const fullPrompt = `${systemPrompt}\n\n${input.queryText}\n\nProvide your analysis with a confidence score (0-100) at the end. Include specific citations (PMID, NCT numbers) when referencing papers or trials.`;
 
@@ -146,19 +150,24 @@ export async function queryGemini(input: QueryInput): Promise<LLMResponse> {
 
     return {
       provider: 'gemini',
-      model: 'gemini-1.5-pro',
+      model: 'gemini-1.5-flash',
       responseText,
       confidenceScore: extractConfidence(responseText),
       sources: extractSources(responseText),
       responseTimeMs,
     };
   } catch (error: any) {
+    console.error('Gemini API error:', error.message);
+    const errorMsg = error.message?.includes('404')
+      ? 'API not enabled. Please enable Generative Language API at console.cloud.google.com'
+      : error.message || 'Unknown error';
+
     return {
       provider: 'gemini',
-      model: 'gemini-1.5-pro',
+      model: 'gemini-1.5-flash',
       responseText: '',
       responseTimeMs: Date.now() - startTime,
-      error: error.message || 'Unknown error',
+      error: errorMsg,
     };
   }
 }
