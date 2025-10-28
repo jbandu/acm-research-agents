@@ -91,6 +91,115 @@ export default function HistoryItemCard({
     });
   };
 
+  const exportQuery = () => {
+    if (responses.length === 0) {
+      alert('No responses to export. Expand the query first to load responses.');
+      return;
+    }
+
+    const exportData = {
+      query_id: query.id,
+      query_text: query.query_text,
+      workflow: query.workflow?.name || 'Generic',
+      created_at: query.created_at,
+      status: query.status,
+      consensus: query.consensus,
+      execution_time_seconds: query.execution?.execution_time_seconds,
+      responses: responses.map(r => ({
+        provider: r.llm_provider,
+        model: r.model_name,
+        response: r.response_text,
+        confidence_score: r.confidence_score,
+        sources: r.sources,
+        tokens_used: r.tokens_used,
+        response_time_ms: r.response_time_ms,
+        error: r.error
+      }))
+    };
+
+    // Export format selection
+    const format = prompt('Export format?\n1. JSON (full data)\n2. Markdown (readable)\n3. CSV (tabular)\n\nEnter 1, 2, or 3:');
+
+    if (!format) return;
+
+    let blob: Blob;
+    let filename: string;
+
+    switch(format) {
+      case '1': // JSON
+        blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+        filename = `query-${query.id}.json`;
+        break;
+
+      case '2': // Markdown
+        let markdown = `# Research Query Results\n\n`;
+        markdown += `**Query:** ${query.query_text}\n\n`;
+        markdown += `**Workflow:** ${exportData.workflow}\n`;
+        markdown += `**Created:** ${formatDate(query.created_at)}\n`;
+        markdown += `**Status:** ${query.status}\n\n`;
+
+        if (query.consensus) {
+          markdown += `## Consensus\n\n`;
+          markdown += `- **Level:** ${query.consensus.consensus_level}\n\n`;
+        }
+
+        markdown += `## Responses\n\n`;
+        responses.forEach(r => {
+          markdown += `### ${r.llm_provider.toUpperCase()} - ${r.model_name}\n\n`;
+          if (r.error) {
+            markdown += `**Error:** ${r.error}\n\n`;
+          } else {
+            markdown += `${r.response_text}\n\n`;
+            markdown += `**Metadata:**\n`;
+            if (r.confidence_score) markdown += `- Confidence: ${r.confidence_score}%\n`;
+            markdown += `- Response Time: ${(r.response_time_ms / 1000).toFixed(2)}s\n`;
+            if (r.tokens_used) markdown += `- Tokens: ${r.tokens_used.toLocaleString()}\n`;
+            markdown += `\n`;
+          }
+          markdown += `---\n\n`;
+        });
+
+        blob = new Blob([markdown], { type: 'text/markdown' });
+        filename = `query-${query.id}.md`;
+        break;
+
+      case '3': // CSV
+        let csv = 'Provider,Model,Confidence,ResponseTime(s),Tokens,Response,Error\n';
+        responses.forEach(r => {
+          const row = [
+            r.llm_provider,
+            r.model_name,
+            r.confidence_score || '',
+            (r.response_time_ms / 1000).toFixed(2),
+            r.tokens_used || '',
+            `"${(r.response_text || '').replace(/"/g, '""').substring(0, 500)}..."`,
+            r.error || ''
+          ];
+          csv += row.join(',') + '\n';
+        });
+
+        blob = new Blob([csv], { type: 'text/csv' });
+        filename = `query-${query.id}.csv`;
+        break;
+
+      default:
+        alert('Invalid format selected');
+        return;
+    }
+
+    // Download
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    alert(`Exported to ${filename}`);
+  };
+
   return (
     <div className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow">
       {/* Compact View */}
@@ -255,6 +364,19 @@ export default function HistoryItemCard({
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                     </svg>
                     Copy Query
+                  </button>
+
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      exportQuery();
+                    }}
+                    className="inline-flex items-center px-4 py-2 border border-blue-300 rounded-lg text-sm font-medium text-blue-700 bg-white hover:bg-blue-50"
+                  >
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    Export
                   </button>
                 </div>
 
