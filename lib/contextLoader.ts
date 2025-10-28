@@ -5,19 +5,14 @@ import Anthropic from '@anthropic-ai/sdk';
 import OpenAI from 'openai';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { query } from './db';
+import { CONTEXT_STRATEGIES, type ContextLevel, type ContextStrategy } from './contextStrategies';
+
+// Re-export for backward compatibility
+export { CONTEXT_STRATEGIES, type ContextLevel, type ContextStrategy };
 
 // ============================================
 // Types and Interfaces
 // ============================================
-
-export type ContextLevel = 'minimal' | 'standard' | 'deep';
-
-export interface ContextStrategy {
-  level: ContextLevel;
-  maxTokens: number;
-  categories: string[];
-  description: string;
-}
 
 export interface KnowledgeBaseEntry {
   id: string;
@@ -40,38 +35,6 @@ export interface ContextUsageMetrics {
   totalContextTokens: number;
   provider: string;
 }
-
-// ============================================
-// Context Strategies Configuration
-// ============================================
-
-export const CONTEXT_STRATEGIES: Record<ContextLevel, ContextStrategy> = {
-  minimal: {
-    level: 'minimal',
-    maxTokens: 0,
-    categories: [],
-    description: 'No additional context - just the user query'
-  },
-  standard: {
-    level: 'standard',
-    maxTokens: 10000,
-    categories: ['company:overview', 'company:challenges', 'people:leadership'],
-    description: 'Company basics and leadership (cached, ~10K tokens)'
-  },
-  deep: {
-    level: 'deep',
-    maxTokens: 200000,
-    categories: [
-      'company:overview',
-      'company:challenges',
-      'people:leadership',
-      'research:clinical_trials',
-      'competitive:tlr9_landscape',
-      'competitive:ai_in_biotech'
-    ],
-    description: 'Full knowledge base with competitive intelligence (cached, ~200K tokens)'
-  }
-};
 
 // ============================================
 // Core Context Loading Functions
