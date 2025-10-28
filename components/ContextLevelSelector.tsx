@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { CONTEXT_STRATEGIES, type ContextLevel } from '@/lib/contextLoader';
+import { CONTEXT_STRATEGIES, type ContextLevel } from '@/lib/contextStrategies';
 
 interface ContextPreview {
   entryCount: number;
