@@ -145,6 +145,120 @@ function QueryPageContent() {
     }
   };
 
+  const exportAllResponses = () => {
+    if (responses.length === 0) {
+      alert('No responses to export');
+      return;
+    }
+
+    const exportData = {
+      query_id: queryId,
+      query_text: queryText,
+      workflow: selectedWorkflow ? workflows.find(w => w.id === selectedWorkflow)?.name : 'Generic',
+      context_level: contextLevel,
+      exported_at: new Date().toISOString(),
+      consensus: consensus,
+      responses: responses.map(r => ({
+        provider: r.provider,
+        model: r.model,
+        response: r.responseText,
+        confidence_score: r.confidenceScore,
+        sources: r.sources,
+        tokens_used: r.tokensUsed,
+        response_time_seconds: (r.responseTimeMs / 1000).toFixed(2),
+        error: r.error
+      }))
+    };
+
+    // Create download options menu
+    const format = prompt('Export format?\n1. JSON (full data)\n2. Markdown (readable)\n3. CSV (tabular)\n\nEnter 1, 2, or 3:');
+
+    if (!format) return;
+
+    let blob: Blob;
+    let filename: string;
+
+    switch(format) {
+      case '1': // JSON
+        blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+        filename = `query-${queryId || 'export'}.json`;
+        break;
+
+      case '2': // Markdown
+        let markdown = `# Research Query Results\n\n`;
+        markdown += `**Query:** ${queryText}\n\n`;
+        markdown += `**Workflow:** ${exportData.workflow}\n`;
+        markdown += `**Context Level:** ${contextLevel}\n`;
+        markdown += `**Exported:** ${new Date().toLocaleString()}\n\n`;
+
+        if (consensus) {
+          markdown += `## Consensus\n\n`;
+          markdown += `- **Level:** ${consensus.consensusLevel}\n`;
+          markdown += `- **Has Consensus:** ${consensus.hasConsensus ? 'Yes' : 'No'}\n`;
+          if (consensus.conflictingProviders?.length > 0) {
+            markdown += `- **Conflicting:** ${consensus.conflictingProviders.join(', ')}\n`;
+          }
+          markdown += `\n`;
+        }
+
+        markdown += `## Responses\n\n`;
+        responses.forEach(r => {
+          markdown += `### ${r.provider.toUpperCase()} - ${r.model}\n\n`;
+          if (r.error) {
+            markdown += `**Error:** ${r.error}\n\n`;
+          } else {
+            markdown += `${r.responseText}\n\n`;
+            markdown += `**Metadata:**\n`;
+            if (r.confidenceScore) markdown += `- Confidence: ${r.confidenceScore}%\n`;
+            markdown += `- Response Time: ${(r.responseTimeMs / 1000).toFixed(2)}s\n`;
+            if (r.tokensUsed) markdown += `- Tokens: ${r.tokensUsed.toLocaleString()}\n`;
+            if (r.sources && r.sources.length > 0) markdown += `- Sources: ${r.sources.join(', ')}\n`;
+            markdown += `\n`;
+          }
+          markdown += `---\n\n`;
+        });
+
+        blob = new Blob([markdown], { type: 'text/markdown' });
+        filename = `query-${queryId || 'export'}.md`;
+        break;
+
+      case '3': // CSV
+        let csv = 'Provider,Model,Confidence,ResponseTime(s),Tokens,Response,Error\n';
+        responses.forEach(r => {
+          const row = [
+            r.provider,
+            r.model,
+            r.confidenceScore || '',
+            (r.responseTimeMs / 1000).toFixed(2),
+            r.tokensUsed || '',
+            `"${(r.responseText || '').replace(/"/g, '""').substring(0, 500)}..."`,
+            r.error || ''
+          ];
+          csv += row.join(',') + '\n';
+        });
+
+        blob = new Blob([csv], { type: 'text/csv' });
+        filename = `query-${queryId || 'export'}.csv`;
+        break;
+
+      default:
+        alert('Invalid format selected');
+        return;
+    }
+
+    // Download
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    alert(`Exported to ${filename}`);
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <h1 className="text-3xl font-bold text-gray-900 mb-8">New Research Query</h1>
@@ -428,7 +542,10 @@ function QueryPageContent() {
             <button className="btn-primary">
               Approve & Save Decision
             </button>
-            <button className="btn-secondary">
+            <button
+              onClick={() => exportAllResponses()}
+              className="btn-secondary"
+            >
               Export All Responses
             </button>
           </div>

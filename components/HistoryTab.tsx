@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { QueryWithDetails, HistoryFilters as HistoryFiltersType } from '@/types/history';
 import HistoryItemCard from './HistoryItemCard';
 import HistoryFilters from './HistoryFilters';
+import HistoryAnalytics from './HistoryAnalytics';
 
 export default function HistoryTab() {
   const [queries, setQueries] = useState<QueryWithDetails[]>([]);
@@ -153,6 +154,9 @@ export default function HistoryTab() {
           View and manage all your past research queries and results
         </p>
       </div>
+
+      {/* Analytics Dashboard */}
+      <HistoryAnalytics />
 
       {/* Search and Filters */}
       <div className="mb-6">
