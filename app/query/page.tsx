@@ -2,6 +2,9 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { ContextLevelSelector } from '@/components/ContextLevelSelector';
+import { DataSourceSelector } from '@/components/DataSourceSelector';
+import { CostEstimator } from '@/components/CostEstimator';
 
 interface LLMResponse {
   provider: 'claude' | 'openai' | 'gemini' | 'grok';
@@ -32,6 +35,11 @@ function QueryPageContent() {
   const [queryId, setQueryId] = useState<string>('');
   const [consensus, setConsensus] = useState<any>(null);
   const [cached, setCached] = useState(false);
+
+  // New features state
+  const [contextLevel, setContextLevel] = useState<'minimal' | 'standard' | 'deep'>('standard');
+  const [selectedDataSources, setSelectedDataSources] = useState<string[]>([]);
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   useEffect(() => {
     fetchWorkflows();
@@ -67,6 +75,8 @@ function QueryPageContent() {
         body: JSON.stringify({
           query_text: queryText,
           workflow_id: selectedWorkflow || null,
+          context_level: contextLevel,
+          data_sources: selectedDataSources.length > 0 ? selectedDataSources : undefined,
         }),
       });
 
@@ -172,13 +182,65 @@ function QueryPageContent() {
           />
         </div>
 
-        <button
-          onClick={handleQuery}
-          disabled={loading || !queryText.trim()}
-          className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {loading ? 'Querying All LLMs...' : 'Run Query'}
-        </button>
+        {/* Advanced Options Toggle */}
+        <div className="mb-4">
+          <button
+            type="button"
+            onClick={() => setShowAdvanced(!showAdvanced)}
+            className="text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center gap-2"
+          >
+            {showAdvanced ? '▼' : '▶'} Advanced Options (Context, Data Sources, Cost Estimate)
+          </button>
+        </div>
+
+        {/* Advanced Options Panel */}
+        {showAdvanced && (
+          <div className="space-y-6 mb-6 p-6 bg-gray-50 rounded-lg border border-gray-200">
+            {/* Context Level Selector */}
+            <div>
+              <ContextLevelSelector
+                selectedLevel={contextLevel}
+                onChange={setContextLevel}
+                showPreview={true}
+              />
+            </div>
+
+            {/* Data Source Selector - Only show if workflow is selected */}
+            {selectedWorkflow && (
+              <div>
+                <DataSourceSelector
+                  workflowId={selectedWorkflow}
+                  selectedSources={selectedDataSources}
+                  onChange={setSelectedDataSources}
+                />
+              </div>
+            )}
+
+            {/* Cost Estimator - Show if we have query + (workflow with sources OR no workflow) */}
+            {queryText && (selectedWorkflow ? selectedDataSources.length > 0 : true) && (
+              <div>
+                <CostEstimator
+                  workflowId={selectedWorkflow || 'generic'}
+                  userQuery={queryText}
+                  selectedDataSources={selectedDataSources}
+                  contextLevel={contextLevel}
+                  onConfirm={handleQuery}
+                />
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Run Query Button - Show if advanced options are hidden */}
+        {!showAdvanced && (
+          <button
+            onClick={handleQuery}
+            disabled={loading || !queryText.trim()}
+            className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loading ? 'Querying All LLMs...' : 'Run Query'}
+          </button>
+        )}
       </div>
 
       {/* Consensus Indicator */}
