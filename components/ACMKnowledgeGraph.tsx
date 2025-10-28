@@ -439,6 +439,21 @@ function KnowledgeGraphContent() {
     return Array.from(stats.values());
   }, [ontologyData]);
 
+  // Active domains (domains with at least one node) for filter buttons
+  const activeDomains = useMemo(() => {
+    if (!ontologyData) return [];
+
+    // Get unique domain IDs from nodes
+    const domainIdsWithNodes = new Set(
+      ontologyData.nodes
+        .map(n => n.domain_id)
+        .filter(Boolean) // Remove null/undefined
+    );
+
+    // Filter domains to only those with nodes
+    return ontologyData.domains.filter(d => domainIdsWithNodes.has(d.id));
+  }, [ontologyData]);
+
   // Export functionality
   const exportGraph = useCallback((format: 'png' | 'json') => {
     if (format === 'json') {
@@ -539,9 +554,9 @@ function KnowledgeGraphContent() {
                 </div>
               </div>
               <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-xl px-6 py-3 shadow-lg hover:bg-white/10 transition-all duration-300 group">
-                <div className="text-xs text-gray-400 mb-1">Domains</div>
+                <div className="text-xs text-gray-400 mb-1">Active Domains</div>
                 <div className="text-2xl font-bold bg-gradient-to-r from-teal-400 to-green-400 bg-clip-text text-transparent group-hover:scale-110 transition-transform">
-                  <AnimatedCounter value={ontologyData?.domains.length || 0} />
+                  <AnimatedCounter value={activeDomains.length} />
                 </div>
               </div>
             </div>
@@ -598,7 +613,7 @@ function KnowledgeGraphContent() {
 
           {/* Controls Row */}
           <div className="flex items-center justify-between">
-            {/* Domain Filter */}
+            {/* Domain Filter - Only show domains with nodes */}
             <div className="flex items-center space-x-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-purple-500/50 scrollbar-track-transparent flex-1 mr-4">
               <button
                 onClick={() => setSelectedDomain(null)}
@@ -608,30 +623,37 @@ function KnowledgeGraphContent() {
                     : 'backdrop-blur-md bg-white/5 border border-white/10 text-gray-300 hover:bg-white/10'
                 }`}
               >
-                All Domains
+                All Domains ({activeDomains.length})
               </button>
-              {ontologyData?.domains.map(domain => (
-                <button
-                  key={domain.id}
-                  onClick={() => setSelectedDomain(domain.id)}
-                  className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 flex-shrink-0 ${
-                    selectedDomain === domain.id
-                      ? 'text-white shadow-lg'
-                      : 'backdrop-blur-md bg-white/5 border border-white/10 text-gray-300 hover:bg-white/10'
-                  }`}
-                  style={{
-                    background: selectedDomain === domain.id
-                      ? `linear-gradient(135deg, ${domain.color}, ${domain.color}cc)`
-                      : undefined,
-                    boxShadow: selectedDomain === domain.id
-                      ? `0 0 20px ${domain.color}60`
-                      : undefined
-                  }}
-                >
-                  <span className="mr-2">{domain.icon}</span>
-                  {domain.name}
-                </button>
-              ))}
+              {activeDomains.map(domain => {
+                // Get count for this domain
+                const stat = domainStats.find(s => s.domain.id === domain.id);
+                const count = stat?.count || 0;
+
+                return (
+                  <button
+                    key={domain.id}
+                    onClick={() => setSelectedDomain(domain.id)}
+                    className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 flex-shrink-0 ${
+                      selectedDomain === domain.id
+                        ? 'text-white shadow-lg'
+                        : 'backdrop-blur-md bg-white/5 border border-white/10 text-gray-300 hover:bg-white/10'
+                    }`}
+                    style={{
+                      background: selectedDomain === domain.id
+                        ? `linear-gradient(135deg, ${domain.color}, ${domain.color}cc)`
+                        : undefined,
+                      boxShadow: selectedDomain === domain.id
+                        ? `0 0 20px ${domain.color}60`
+                        : undefined
+                    }}
+                  >
+                    <span className="mr-2">{domain.icon}</span>
+                    {domain.name}
+                    <span className="ml-2 text-xs opacity-75">({count})</span>
+                  </button>
+                );
+              })}
             </div>
 
             {/* Layout & Export Controls */}
