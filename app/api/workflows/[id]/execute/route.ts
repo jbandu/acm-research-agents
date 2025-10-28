@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 import { queryAllLLMs } from '@/lib/llm-clients';
+import { requireAuth } from '@/lib/session';
 
 // POST /api/workflows/[id]/execute - Execute workflow with parameters
 export async function POST(
@@ -8,13 +9,16 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Require authentication
+    const user = await requireAuth();
+
     const { id: workflowId } = await params;
     const body = await request.json();
-    const { parameters, query_text, created_by } = body;
+    const { parameters, query_text } = body;
 
-    if (!query_text || !created_by) {
+    if (!query_text) {
       return NextResponse.json(
-        { error: 'Missing required fields: query_text, created_by' },
+        { error: 'Missing required field: query_text' },
         { status: 400 }
       );
     }
@@ -55,10 +59,10 @@ export async function POST(
 
     // Create query record
     const queryResult = await query(
-      `INSERT INTO queries (query_text, workflow_id, created_by, status)
+      `INSERT INTO queries (query_text, workflow_id, user_id, status)
        VALUES ($1, $2, $3, $4)
        RETURNING id`,
-      [query_text, workflowId, created_by, 'processing']
+      [query_text, workflowId, user.id, 'processing']
     );
 
     const queryId = queryResult.rows[0].id;

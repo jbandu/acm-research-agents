@@ -67,7 +67,6 @@ function QueryPageContent() {
         body: JSON.stringify({
           query_text: queryText,
           workflow_id: selectedWorkflow || null,
-          created_by: 'current_user', // Replace with actual user auth
         }),
       });
 

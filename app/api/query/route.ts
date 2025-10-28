@@ -1,15 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { queryAllLLMs, LLMResponse } from '@/lib/llm-clients';
 import { query } from '@/lib/db';
+import { requireAuth } from '@/lib/session';
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { query_text, workflow_id, created_by, system_prompt } = body;
+    // Require authentication
+    const user = await requireAuth();
 
-    if (!query_text || !created_by) {
+    const body = await request.json();
+    const { query_text, workflow_id, system_prompt } = body;
+
+    if (!query_text) {
       return NextResponse.json(
-        { error: 'Missing required fields: query_text, created_by' },
+        { error: 'Missing required field: query_text' },
         { status: 400 }
       );
     }
@@ -50,8 +54,8 @@ export async function POST(request: NextRequest) {
 
     // Create query record
     const queryResult = await query(
-      'INSERT INTO queries (query_text, workflow_id, created_by, status) VALUES ($1, $2, $3, $4) RETURNING id',
-      [query_text, workflow_id, created_by, 'processing']
+      'INSERT INTO queries (query_text, workflow_id, user_id, status) VALUES ($1, $2, $3, $4) RETURNING id',
+      [query_text, workflow_id, user.id, 'processing']
     );
 
     const queryId = queryResult.rows[0].id;

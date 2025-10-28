@@ -38,7 +38,6 @@ export default function WorkflowDetailModal({ workflow, onClose }: WorkflowDetai
         body: JSON.stringify({
           query_text: queryText,
           parameters,
-          created_by: 'current_user', // TODO: Replace with actual user auth
         }),
       });
 

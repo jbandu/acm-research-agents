@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 import { queryAllLLMs } from '@/lib/llm-clients';
+import { requireAuth } from '@/lib/session';
 
 // POST /api/history/[id]/re-run - Re-execute an old query
 export async function POST(
@@ -8,11 +9,14 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Require authentication
+    const user = await requireAuth();
+
     const { id: originalQueryId } = await params;
 
     // Get original query details
     const originalQueryResult = await query(
-      `SELECT q.query_text, q.workflow_id, q.created_by, w.system_prompt
+      `SELECT q.query_text, q.workflow_id, w.system_prompt
        FROM queries q
        LEFT JOIN workflows w ON w.id = q.workflow_id
        WHERE q.id = $1`,
@@ -30,13 +34,13 @@ export async function POST(
 
     // Create new query record
     const newQueryResult = await query(
-      `INSERT INTO queries (query_text, workflow_id, created_by, status)
+      `INSERT INTO queries (query_text, workflow_id, user_id, status)
        VALUES ($1, $2, $3, $4)
        RETURNING id`,
       [
         originalQuery.query_text,
         originalQuery.workflow_id,
-        originalQuery.created_by,
+        user.id,
         'processing',
       ]
     );
