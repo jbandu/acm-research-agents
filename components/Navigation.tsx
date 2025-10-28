@@ -53,6 +53,16 @@ export default function Navigation() {
                 >
                   History
                 </Link>
+                <Link
+                  href="/ontology"
+                  className={`px-3 py-2 rounded-md text-sm font-medium ${
+                    pathname === '/ontology'
+                      ? 'text-blue-600 bg-blue-50'
+                      : 'text-gray-700 hover:text-blue-600'
+                  }`}
+                >
+                  Knowledge Graph
+                </Link>
               </div>
             )}
           </div>

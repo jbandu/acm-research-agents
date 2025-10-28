@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 import { queryAllLLMs } from '@/lib/llm-clients';
 import { requireAuth } from '@/lib/session';
+import { loadACMContext, getWorkflowContextStrategy, trackContextUsage, type ContextLevel } from '@/lib/contextLoader';
 
 // POST /api/workflows/[id]/execute - Execute workflow with parameters
 export async function POST(
@@ -83,11 +84,36 @@ export async function POST(
       [workflowId]
     );
 
+    // Load ACM context based on workflow strategy (with prompt caching)
+    let contextLevel: ContextLevel = body.contextLevel || 'standard'; // Allow override from request
+    let acmContext = '';
+    let contextEntries: any[] = [];
+
+    // Check if workflow has a specific context strategy
+    const contextStrategy = await getWorkflowContextStrategy(workflowId);
+    if (contextStrategy) {
+      contextLevel = contextStrategy.level;
+    }
+
+    // Load context if not minimal
+    if (contextLevel !== 'minimal') {
+      const contextResult = await loadACMContext(contextLevel);
+      acmContext = contextResult.context;
+      contextEntries = contextResult.entries;
+      console.log(`📚 Loaded ${contextEntries.length} knowledge base entries (${contextLevel} context)`);
+    }
+
+    // Enhance system prompt with ACM context
+    let finalSystemPrompt = enrichedPrompt;
+    if (acmContext) {
+      finalSystemPrompt = `${acmContext}\n\n---\n\n${enrichedPrompt}`;
+    }
+
     // Execute query with all LLMs
     const startTime = Date.now();
     const llmResponses = await queryAllLLMs({
       queryText: query_text,
-      systemPrompt: enrichedPrompt,
+      systemPrompt: finalSystemPrompt,
     });
 
     // Save all responses to database
@@ -165,6 +191,24 @@ export async function POST(
        VALUES ($1, $2, $3, $4)`,
       [queryId, consensusLevel, agreeing_providers, conflicting_providers]
     );
+
+    // Track context usage for each provider (for analytics and cost tracking)
+    if (contextLevel !== 'minimal') {
+      for (const response of llmResponses) {
+        if (!response.error) {
+          await trackContextUsage({
+            queryId,
+            contextLevel,
+            knowledgeBaseIds: contextEntries.map(e => e.id),
+            cacheHit: false, // We don't track this at the workflow level yet
+            cacheReadTokens: 0,
+            cacheWriteTokens: 0,
+            totalContextTokens: Math.ceil(acmContext.length / 4),
+            provider: response.provider
+          });
+        }
+      }
+    }
 
     return NextResponse.json({
       execution_id: executionId,
