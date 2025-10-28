@@ -122,8 +122,34 @@ export async function GET(request: NextRequest) {
       queries = queries.filter(Boolean);
     }
 
+    // Transform flat fields into nested objects for component compatibility
+    const transformedQueries = queries.map(q => ({
+      id: q.id,
+      workflow_id: q.workflow_id,
+      query_text: q.query_text,
+      created_by: q.created_by,
+      status: q.status,
+      created_at: q.created_at,
+      response_count: q.response_count,
+      responses: [], // Responses loaded separately when expanding
+      workflow: q.workflow_name ? {
+        id: q.workflow_id,
+        name: q.workflow_name,
+        category: q.workflow_category,
+        icon: q.workflow_icon
+      } : null,
+      consensus: q.consensus_level ? {
+        consensus_level: q.consensus_level,
+        agreeing_providers: q.agreeing_providers || [],
+        conflicting_providers: q.conflicting_providers || []
+      } : null,
+      execution: q.execution_time_seconds ? {
+        execution_time_seconds: q.execution_time_seconds
+      } : null
+    }));
+
     return NextResponse.json({
-      queries,
+      queries: transformedQueries,
       pagination: {
         page,
         limit,
