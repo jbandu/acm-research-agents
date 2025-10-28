@@ -122,13 +122,6 @@ export default function SignInPage() {
             </p>
           </div>
         </form>
-
-        {/* Admin Credentials Info */}
-        <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <p className="text-xs text-blue-900 font-semibold mb-1">Admin Access:</p>
-          <p className="text-xs text-blue-800">Email: jbandu@gmail.com</p>
-          <p className="text-xs text-blue-800">Password: Admin@123!</p>
-        </div>
       </div>
     </div>
   );

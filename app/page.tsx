@@ -92,18 +92,37 @@ export default function Home() {
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
-              <Link
-                href="/query"
-                className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-semibold text-lg hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200"
-              >
-                Start New Query →
-              </Link>
-              <Link
-                href="/workflows"
-                className="px-8 py-4 bg-white text-gray-700 rounded-lg font-semibold text-lg border-2 border-gray-200 hover:border-blue-600 hover:text-blue-600 transition-all duration-200"
-              >
-                Explore Workflows
-              </Link>
+              {session ? (
+                <>
+                  <Link
+                    href="/query"
+                    className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-semibold text-lg hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200"
+                  >
+                    Start New Query →
+                  </Link>
+                  <Link
+                    href="/workflows"
+                    className="px-8 py-4 bg-white text-gray-700 rounded-lg font-semibold text-lg border-2 border-gray-200 hover:border-blue-600 hover:text-blue-600 transition-all duration-200"
+                  >
+                    Explore Workflows
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/auth/signin"
+                    className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-semibold text-lg hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200"
+                  >
+                    Sign In to Get Started →
+                  </Link>
+                  <Link
+                    href="/auth/register"
+                    className="px-8 py-4 bg-white text-gray-700 rounded-lg font-semibold text-lg border-2 border-gray-200 hover:border-blue-600 hover:text-blue-600 transition-all duration-200"
+                  >
+                    Create Account
+                  </Link>
+                </>
+              )}
             </div>
 
             {/* Stats Cards */}
@@ -401,10 +420,10 @@ export default function Home() {
                 <p className="text-lg text-gray-600">Pre-optimized templates for common research scenarios</p>
               </div>
               <Link
-                href="/workflows"
+                href={session ? '/workflows' : '/auth/signin'}
                 className="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
               >
-                View All Workflows →
+                {session ? 'View All Workflows →' : 'Sign In to View Workflows →'}
               </Link>
             </div>
 
@@ -429,7 +448,7 @@ export default function Home() {
                       {workflow.use_count || 0} uses
                     </span>
                     <Link
-                      href={`/query?workflow=${workflow.id}`}
+                      href={session ? `/query?workflow=${workflow.id}` : '/auth/signin'}
                       className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center"
                     >
                       Use Workflow
@@ -557,18 +576,37 @@ export default function Home() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Link
-              href="/query"
-              className="px-8 py-4 bg-white text-blue-600 rounded-lg font-semibold text-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
-            >
-              Start Your First Query
-            </Link>
-            <Link
-              href="/history"
-              className="px-8 py-4 bg-blue-700 text-white rounded-lg font-semibold text-lg border-2 border-blue-400 hover:bg-blue-800 transition-all duration-200"
-            >
-              View Query History
-            </Link>
+            {session ? (
+              <>
+                <Link
+                  href="/query"
+                  className="px-8 py-4 bg-white text-blue-600 rounded-lg font-semibold text-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
+                >
+                  Start Your First Query
+                </Link>
+                <Link
+                  href="/history"
+                  className="px-8 py-4 bg-blue-700 text-white rounded-lg font-semibold text-lg border-2 border-blue-400 hover:bg-blue-800 transition-all duration-200"
+                >
+                  View Query History
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/auth/signin"
+                  className="px-8 py-4 bg-white text-blue-600 rounded-lg font-semibold text-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
+                >
+                  Sign In Now
+                </Link>
+                <Link
+                  href="/auth/register"
+                  className="px-8 py-4 bg-blue-700 text-white rounded-lg font-semibold text-lg border-2 border-blue-400 hover:bg-blue-800 transition-all duration-200"
+                >
+                  Create Free Account
+                </Link>
+              </>
+            )}
           </div>
 
           {session && (
