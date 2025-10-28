@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useEffect, useState, useMemo } from 'react';
+import React, { useCallback, useEffect, useState, useMemo, useRef, memo } from 'react';
 import ReactFlow, {
   Node,
   Edge,
@@ -9,12 +9,11 @@ import ReactFlow, {
   MiniMap,
   useNodesState,
   useEdgesState,
-  addEdge,
-  Connection,
   Panel,
   MarkerType,
   NodeTypes,
-  Position
+  useReactFlow,
+  ReactFlowProvider
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 
@@ -59,8 +58,36 @@ interface OntologyData {
   stats: any;
 }
 
-// Custom Node Component with glassmorphism and animations
-const CustomNode = ({ data }: { data: any }) => {
+// Animated Counter Component
+const AnimatedCounter = memo(({ value, duration = 2000 }: { value: number; duration?: number }) => {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    let startTime: number;
+    let animationFrame: number;
+
+    const animate = (currentTime: number) => {
+      if (!startTime) startTime = currentTime;
+      const progress = Math.min((currentTime - startTime) / duration, 1);
+
+      setCount(Math.floor(progress * value));
+
+      if (progress < 1) {
+        animationFrame = requestAnimationFrame(animate);
+      }
+    };
+
+    animationFrame = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(animationFrame);
+  }, [value, duration]);
+
+  return <span>{count}</span>;
+});
+
+AnimatedCounter.displayName = 'AnimatedCounter';
+
+// Custom Node Component with enhanced interactivity
+const CustomNode = memo(({ data }: { data: any }) => {
   const [isHovered, setIsHovered] = useState(false);
 
   const getNodeIcon = (nodeType: string) => {
@@ -81,13 +108,17 @@ const CustomNode = ({ data }: { data: any }) => {
     return icons[nodeType] || '📍';
   };
 
+  // Calculate connection count for size
+  const connectionCount = data.connectionCount || 0;
+  const sizeMultiplier = Math.max(1, Math.min(1.5, 1 + connectionCount * 0.05));
+
   return (
     <div
       className="relative group transition-all duration-300 ease-out"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       style={{
-        transform: isHovered ? 'scale(1.05)' : 'scale(1)',
+        transform: isHovered ? `scale(${1.05 * sizeMultiplier})` : `scale(${sizeMultiplier})`,
         filter: isHovered ? 'brightness(1.1)' : 'brightness(1)'
       }}
     >
@@ -146,9 +177,16 @@ const CustomNode = ({ data }: { data: any }) => {
               {data.nodeType}
             </div>
 
+            {/* Connection Count Badge */}
+            {connectionCount > 0 && (
+              <div className="text-xs text-gray-300 mt-1">
+                🔗 {connectionCount} connections
+              </div>
+            )}
+
             {/* Description */}
             {data.description && (
-              <div className="text-xs text-gray-200 line-clamp-2 leading-relaxed">
+              <div className="text-xs text-gray-200 line-clamp-2 leading-relaxed mt-2">
                 {data.description}
               </div>
             )}
@@ -166,22 +204,54 @@ const CustomNode = ({ data }: { data: any }) => {
       </div>
     </div>
   );
-};
+});
+
+CustomNode.displayName = 'CustomNode';
 
 const nodeTypes: NodeTypes = {
   custom: CustomNode
 };
 
-export function ACMKnowledgeGraph() {
+// Main Component
+function KnowledgeGraphContent() {
   const [ontologyData, setOntologyData] = useState<OntologyData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedNode, setSelectedNode] = useState<OntologyNode | null>(null);
   const [selectedDomain, setSelectedDomain] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchSuggestions, setSearchSuggestions] = useState<string[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [layoutMode, setLayoutMode] = useState<'force' | 'hierarchical' | 'circular'>('force');
 
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const { fitView } = useReactFlow();
+
+  // Debounced search
+  useEffect(() => {
+    if (!searchQuery || !ontologyData) {
+      setSearchSuggestions([]);
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      const suggestions = ontologyData.nodes
+        .filter(node =>
+          node.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          node.description?.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+        .slice(0, 5)
+        .map(node => node.name);
+
+      setSearchSuggestions(suggestions);
+      setShowSuggestions(suggestions.length > 0);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery, ontologyData]);
 
   // Fetch ontology data
   useEffect(() => {
@@ -211,16 +281,25 @@ export function ACMKnowledgeGraph() {
     }
   };
 
+  // Calculate connection counts
+  const getConnectionCounts = useCallback((data: OntologyData) => {
+    const counts = new Map<string, number>();
+    data.relationships.forEach(rel => {
+      counts.set(rel.source_node_id, (counts.get(rel.source_node_id) || 0) + 1);
+      counts.set(rel.target_node_id, (counts.get(rel.target_node_id) || 0) + 1);
+    });
+    return counts;
+  }, []);
+
   // Transform ontology data to ReactFlow format
-  const transformToFlowData = (data: OntologyData) => {
+  const transformToFlowData = useCallback((data: OntologyData) => {
+    const connectionCounts = getConnectionCounts(data);
+
     // Transform nodes
-    const flowNodes: Node[] = data.nodes.map(node => ({
+    const flowNodes: Node[] = data.nodes.map((node, index) => ({
       id: node.id,
       type: 'custom',
-      position: {
-        x: node.position_x || Math.random() * 1000,
-        y: node.position_y || Math.random() * 800
-      },
+      position: getNodePosition(node, index, data.nodes.length, layoutMode),
       data: {
         label: node.name,
         description: node.description,
@@ -229,7 +308,8 @@ export function ACMKnowledgeGraph() {
         domainColor: node.domain_color,
         domainIcon: node.domain_icon,
         metadata: node.metadata,
-        fullNode: node
+        fullNode: node,
+        connectionCount: connectionCounts.get(node.id) || 0
       }
     }));
 
@@ -240,6 +320,7 @@ export function ACMKnowledgeGraph() {
       target: rel.target_node_id,
       label: rel.relationship_type.replace(/_/g, ' '),
       animated: rel.strength > 70,
+      type: 'smoothstep',
       style: {
         stroke: rel.strength > 70
           ? 'url(#gradient-strong)'
@@ -271,12 +352,65 @@ export function ACMKnowledgeGraph() {
 
     setNodes(flowNodes);
     setEdges(flowEdges);
+  }, [layoutMode, getConnectionCounts, setNodes, setEdges]);
+
+  // Layout algorithms
+  const getNodePosition = (node: OntologyNode, index: number, total: number, mode: string) => {
+    if (node.position_x && node.position_y && mode === 'force') {
+      return { x: node.position_x, y: node.position_y };
+    }
+
+    switch (mode) {
+      case 'hierarchical':
+        const domainsMap = new Map<string, number>();
+        let domainIndex = 0;
+        return {
+          x: 100 + (index % 5) * 300,
+          y: 100 + Math.floor(index / 5) * 200
+        };
+
+      case 'circular':
+        const angle = (index / total) * 2 * Math.PI;
+        const radius = 400;
+        return {
+          x: 600 + radius * Math.cos(angle),
+          y: 400 + radius * Math.sin(angle)
+        };
+
+      default: // force
+        return {
+          x: Math.random() * 1000,
+          y: Math.random() * 800
+        };
+    }
   };
+
+  // Apply layout
+  const applyLayout = useCallback((mode: 'force' | 'hierarchical' | 'circular') => {
+    setLayoutMode(mode);
+    if (ontologyData) {
+      transformToFlowData(ontologyData);
+      setTimeout(() => fitView({ duration: 800 }), 100);
+    }
+  }, [ontologyData, transformToFlowData, fitView]);
 
   // Handle node click
   const onNodeClick = useCallback((event: React.MouseEvent, node: Node) => {
     setSelectedNode(node.data.fullNode);
   }, []);
+
+  // Handle search selection
+  const handleSearchSelect = (suggestion: string) => {
+    setSearchQuery(suggestion);
+    setShowSuggestions(false);
+
+    // Find and select the node
+    const node = nodes.find(n => n.data.label === suggestion);
+    if (node) {
+      setSelectedNode(node.data.fullNode);
+      fitView({ nodes: [node], duration: 500, padding: 0.3 });
+    }
+  };
 
   // Filter nodes based on search
   const filteredNodes = useMemo(() => {
@@ -287,6 +421,7 @@ export function ACMKnowledgeGraph() {
     );
   }, [nodes, searchQuery]);
 
+  // Domain stats with memoization
   const domainStats = useMemo(() => {
     if (!ontologyData) return [];
 
@@ -303,6 +438,25 @@ export function ACMKnowledgeGraph() {
 
     return Array.from(stats.values());
   }, [ontologyData]);
+
+  // Export functionality
+  const exportGraph = useCallback((format: 'png' | 'json') => {
+    if (format === 'json') {
+      const data = {
+        nodes: nodes.map(n => ({ id: n.id, ...n.data })),
+        edges: edges.map(e => ({ id: e.id, source: e.source, target: e.target }))
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'knowledge-graph.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    } else {
+      alert('PNG export requires html-to-image library. Would be implemented in production.');
+    }
+  }, [nodes, edges]);
 
   if (loading) {
     return (
@@ -365,84 +519,160 @@ export function ACMKnowledgeGraph() {
                   ACM Biolabs Knowledge Graph
                 </h1>
                 <p className="text-sm text-gray-400 mt-1">
-                  Interactive visualization of research entities and relationships
+                  Interactive visualization • {nodes.length} nodes • {edges.length} connections
                 </p>
               </div>
             </div>
 
-            {/* Stats - Glassmorphism cards */}
+            {/* Animated Stats Cards */}
             <div className="flex items-center space-x-4">
-              <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-xl px-6 py-3 shadow-lg">
-                <div className="text-xs text-gray-400 mb-1">Nodes</div>
-                <div className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
-                  {ontologyData?.stats.totalNodes || 0}
+              <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-xl px-6 py-3 shadow-lg hover:bg-white/10 transition-all duration-300 group">
+                <div className="text-xs text-gray-400 mb-1">Total Nodes</div>
+                <div className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent group-hover:scale-110 transition-transform">
+                  <AnimatedCounter value={ontologyData?.stats.totalNodes || 0} />
                 </div>
               </div>
-              <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-xl px-6 py-3 shadow-lg">
+              <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-xl px-6 py-3 shadow-lg hover:bg-white/10 transition-all duration-300 group">
                 <div className="text-xs text-gray-400 mb-1">Relationships</div>
-                <div className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-teal-400 bg-clip-text text-transparent">
-                  {ontologyData?.stats.totalRelationships || 0}
+                <div className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-teal-400 bg-clip-text text-transparent group-hover:scale-110 transition-transform">
+                  <AnimatedCounter value={ontologyData?.stats.totalRelationships || 0} />
+                </div>
+              </div>
+              <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-xl px-6 py-3 shadow-lg hover:bg-white/10 transition-all duration-300 group">
+                <div className="text-xs text-gray-400 mb-1">Domains</div>
+                <div className="text-2xl font-bold bg-gradient-to-r from-teal-400 to-green-400 bg-clip-text text-transparent group-hover:scale-110 transition-transform">
+                  <AnimatedCounter value={ontologyData?.domains.length || 0} />
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Search Bar */}
-          <div className="mb-4">
+          {/* Search Bar with Autocomplete */}
+          <div className="mb-4 relative">
             <div className="relative">
               <input
+                ref={searchInputRef}
                 type="text"
                 placeholder="Search nodes by name or description..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-5 py-3 pl-12 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all duration-300"
+                onFocus={() => searchSuggestions.length > 0 && setShowSuggestions(true)}
+                className="w-full px-5 py-3 pl-12 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300"
               />
               <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
+              {searchQuery && (
+                <button
+                  onClick={() => {
+                    setSearchQuery('');
+                    setShowSuggestions(false);
+                  }}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
             </div>
+
+            {/* Autocomplete Suggestions */}
+            {showSuggestions && searchSuggestions.length > 0 && (
+              <div className="absolute top-full left-0 right-0 mt-2 backdrop-blur-xl bg-slate-900/90 border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50">
+                {searchSuggestions.map((suggestion, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => handleSearchSelect(suggestion)}
+                    className="w-full px-5 py-3 text-left text-white hover:bg-white/10 transition-colors flex items-center space-x-3 border-b border-white/5 last:border-b-0"
+                  >
+                    <svg className="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                    <span>{suggestion}</span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* Domain Filter - Horizontal scroll */}
-          <div className="flex items-center space-x-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-purple-500/50 scrollbar-track-transparent">
-            <button
-              onClick={() => setSelectedDomain(null)}
-              className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 flex-shrink-0 ${
-                selectedDomain === null
-                  ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg shadow-purple-500/50'
-                  : 'backdrop-blur-md bg-white/5 border border-white/10 text-gray-300 hover:bg-white/10'
-              }`}
-            >
-              All Domains
-            </button>
-            {ontologyData?.domains.map(domain => (
+          {/* Controls Row */}
+          <div className="flex items-center justify-between">
+            {/* Domain Filter */}
+            <div className="flex items-center space-x-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-purple-500/50 scrollbar-track-transparent flex-1 mr-4">
               <button
-                key={domain.id}
-                onClick={() => setSelectedDomain(domain.id)}
+                onClick={() => setSelectedDomain(null)}
                 className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 flex-shrink-0 ${
-                  selectedDomain === domain.id
-                    ? 'text-white shadow-lg'
+                  selectedDomain === null
+                    ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg shadow-purple-500/50'
                     : 'backdrop-blur-md bg-white/5 border border-white/10 text-gray-300 hover:bg-white/10'
                 }`}
-                style={{
-                  background: selectedDomain === domain.id
-                    ? `linear-gradient(135deg, ${domain.color}, ${domain.color}cc)`
-                    : undefined,
-                  boxShadow: selectedDomain === domain.id
-                    ? `0 0 20px ${domain.color}60`
-                    : undefined
-                }}
               >
-                <span className="mr-2">{domain.icon}</span>
-                {domain.name}
+                All Domains
               </button>
-            ))}
+              {ontologyData?.domains.map(domain => (
+                <button
+                  key={domain.id}
+                  onClick={() => setSelectedDomain(domain.id)}
+                  className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 flex-shrink-0 ${
+                    selectedDomain === domain.id
+                      ? 'text-white shadow-lg'
+                      : 'backdrop-blur-md bg-white/5 border border-white/10 text-gray-300 hover:bg-white/10'
+                  }`}
+                  style={{
+                    background: selectedDomain === domain.id
+                      ? `linear-gradient(135deg, ${domain.color}, ${domain.color}cc)`
+                      : undefined,
+                    boxShadow: selectedDomain === domain.id
+                      ? `0 0 20px ${domain.color}60`
+                      : undefined
+                  }}
+                >
+                  <span className="mr-2">{domain.icon}</span>
+                  {domain.name}
+                </button>
+              ))}
+            </div>
+
+            {/* Layout & Export Controls */}
+            <div className="flex items-center space-x-2">
+              {/* Layout Switcher */}
+              <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-xl p-1 flex">
+                {(['force', 'hierarchical', 'circular'] as const).map((mode) => (
+                  <button
+                    key={mode}
+                    onClick={() => applyLayout(mode)}
+                    className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all duration-300 ${
+                      layoutMode === mode
+                        ? 'bg-purple-600 text-white'
+                        : 'text-gray-400 hover:text-white hover:bg-white/5'
+                    }`}
+                    title={`${mode.charAt(0).toUpperCase() + mode.slice(1)} Layout`}
+                  >
+                    {mode === 'force' && '🌐'}
+                    {mode === 'hierarchical' && '📊'}
+                    {mode === 'circular' && '⭕'}
+                  </button>
+                ))}
+              </div>
+
+              {/* Export Button */}
+              <button
+                onClick={() => exportGraph('json')}
+                className="backdrop-blur-md bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-gray-300 hover:bg-white/10 hover:text-white transition-all duration-300"
+                title="Export as JSON"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
       {/* ReactFlow Graph */}
-      <div className="h-full pt-56 relative">
+      <div className="h-full pt-64 relative">
         {/* SVG Gradients for edges */}
         <svg style={{ position: 'absolute', width: 0, height: 0 }}>
           <defs>
@@ -490,7 +720,8 @@ export function ACMKnowledgeGraph() {
               {domainStats.map(({ domain, count }) => (
                 <div
                   key={domain.id}
-                  className="flex items-center justify-between p-3 rounded-xl backdrop-blur-sm bg-white/5 border border-white/5 hover:bg-white/10 transition-all duration-300 group"
+                  className="flex items-center justify-between p-3 rounded-xl backdrop-blur-sm bg-white/5 border border-white/5 hover:bg-white/10 transition-all duration-300 group cursor-pointer"
+                  onClick={() => setSelectedDomain(domain.id)}
                 >
                   <div className="flex items-center space-x-3">
                     <div
@@ -515,9 +746,9 @@ export function ACMKnowledgeGraph() {
         </ReactFlow>
       </div>
 
-      {/* Node Details Sidebar - Enhanced Glassmorphism */}
+      {/* Enhanced Node Details Sidebar */}
       {selectedNode && (
-        <div className="absolute top-56 right-6 w-96 backdrop-blur-2xl bg-slate-900/70 border border-white/20 rounded-2xl shadow-2xl p-8 max-h-[calc(100vh-15rem)] overflow-y-auto z-20 animate-slide-in">
+        <div className="absolute top-64 right-6 w-[420px] backdrop-blur-2xl bg-slate-900/70 border border-white/20 rounded-2xl shadow-2xl p-8 max-h-[calc(100vh-17rem)] overflow-y-auto z-20 animate-slide-in">
           <div className="flex items-start justify-between mb-6">
             <div className="flex items-center space-x-4">
               <div
@@ -556,6 +787,20 @@ export function ACMKnowledgeGraph() {
           </div>
 
           <div className="space-y-6">
+            {/* Connection Info */}
+            <div className="backdrop-blur-sm bg-white/5 rounded-xl p-4 border border-white/10">
+              <h4 className="text-sm font-bold text-purple-300 mb-2 uppercase tracking-wide">Connections</h4>
+              <div className="flex items-center space-x-2">
+                <svg className="w-5 h-5 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                </svg>
+                <span className="text-2xl font-bold text-white">
+                  {edges.filter(e => e.source === selectedNode.id || e.target === selectedNode.id).length}
+                </span>
+                <span className="text-sm text-gray-400">relationships</span>
+              </div>
+            </div>
+
             <div className="backdrop-blur-sm bg-white/5 rounded-xl p-4 border border-white/10">
               <h4 className="text-sm font-bold text-purple-300 mb-2 uppercase tracking-wide">Description</h4>
               <p className="text-sm text-gray-300 leading-relaxed">{selectedNode.description}</p>
@@ -595,6 +840,25 @@ export function ACMKnowledgeGraph() {
                 </div>
               </div>
             )}
+
+            {/* Action Buttons */}
+            <div className="flex items-center space-x-2">
+              <button className="flex-1 px-4 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl hover:from-purple-500 hover:to-blue-500 transition-all duration-300 font-semibold shadow-lg hover:shadow-purple-500/50">
+                View Details
+              </button>
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(selectedNode.name);
+                  alert('Node name copied!');
+                }}
+                className="px-4 py-3 backdrop-blur-md bg-white/5 border border-white/10 text-gray-300 hover:bg-white/10 hover:text-white rounded-xl transition-all duration-300"
+                title="Copy name"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -626,5 +890,14 @@ export function ACMKnowledgeGraph() {
         }
       `}</style>
     </div>
+  );
+}
+
+// Wrapped component with ReactFlowProvider
+export function ACMKnowledgeGraph() {
+  return (
+    <ReactFlowProvider>
+      <KnowledgeGraphContent />
+    </ReactFlowProvider>
   );
 }
