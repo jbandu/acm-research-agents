@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
         WHERE r.source_node_id IN (${placeholders})
            OR r.target_node_id IN (${placeholders})
         ORDER BY r.strength DESC, r.created_at DESC
-      `, [...nodeIds, ...nodeIds]);
+      `, nodeIds);
     } else {
       // No domain selected - return empty relationships for clean domain overview
       relationshipsResult = { rows: [] };
