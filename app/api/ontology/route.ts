@@ -18,46 +18,58 @@ export async function GET(request: NextRequest) {
     `);
 
     // Fetch nodes with optional filtering
-    let nodesSql = `
-      SELECT
-        n.*,
-        d.name as domain_name,
-        d.color as domain_color,
-        d.icon as domain_icon
-      FROM acm_nodes n
-      LEFT JOIN acm_domains d ON n.domain_id = d.id
-      WHERE 1=1
-    `;
-    const nodesParams: any[] = [];
-    let paramIndex = 1;
-
+    // Only fetch nodes if a specific domain is selected
+    let nodesResult;
     if (domainId) {
-      nodesSql += ` AND n.domain_id = $${paramIndex}`;
-      nodesParams.push(domainId);
-      paramIndex++;
+      let nodesSql = `
+        SELECT
+          n.*,
+          d.name as domain_name,
+          d.color as domain_color,
+          d.icon as domain_icon
+        FROM acm_nodes n
+        LEFT JOIN acm_domains d ON n.domain_id = d.id
+        WHERE n.domain_id = $1
+      `;
+      const nodesParams: any[] = [domainId];
+      let paramIndex = 2;
+
+      if (nodeType) {
+        nodesSql += ` AND n.node_type = $${paramIndex}`;
+        nodesParams.push(nodeType);
+        paramIndex++;
+      }
+
+      nodesSql += ' ORDER BY n.created_at DESC';
+      nodesResult = await query(nodesSql, nodesParams);
+    } else {
+      // No domain selected - return empty nodes array for clean domain overview
+      nodesResult = { rows: [] };
     }
-
-    if (nodeType) {
-      nodesSql += ` AND n.node_type = $${paramIndex}`;
-      nodesParams.push(nodeType);
-      paramIndex++;
-    }
-
-    nodesSql += ' ORDER BY n.created_at DESC';
-
-    const nodesResult = await query(nodesSql, nodesParams);
 
     // Fetch relationships
-    const relationshipsResult = await query(`
-      SELECT
-        r.*,
-        sn.name as source_name,
-        tn.name as target_name
-      FROM acm_relationships r
-      LEFT JOIN acm_nodes sn ON r.source_node_id = sn.id
-      LEFT JOIN acm_nodes tn ON r.target_node_id = tn.id
-      ORDER BY r.strength DESC, r.created_at DESC
-    `);
+    // Only fetch relationships if a specific domain is selected
+    let relationshipsResult;
+    if (domainId && nodesResult.rows.length > 0) {
+      const nodeIds = nodesResult.rows.map((n: any) => n.id);
+      const placeholders = nodeIds.map((_: any, i: number) => `$${i + 1}`).join(',');
+
+      relationshipsResult = await query(`
+        SELECT
+          r.*,
+          sn.name as source_name,
+          tn.name as target_name
+        FROM acm_relationships r
+        LEFT JOIN acm_nodes sn ON r.source_node_id = sn.id
+        LEFT JOIN acm_nodes tn ON r.target_node_id = tn.id
+        WHERE r.source_node_id IN (${placeholders})
+           OR r.target_node_id IN (${placeholders})
+        ORDER BY r.strength DESC, r.created_at DESC
+      `, [...nodeIds, ...nodeIds]);
+    } else {
+      // No domain selected - return empty relationships for clean domain overview
+      relationshipsResult = { rows: [] };
+    }
 
     // Calculate statistics
     const stats = {
