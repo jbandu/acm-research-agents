@@ -682,19 +682,87 @@ function KnowledgeGraphContent() {
         </div>
       </div>
 
-      {/* ReactFlow Graph */}
+      {/* ReactFlow Graph or Domain Cards View */}
       <div className="h-full pt-64 relative">
-        {/* SVG Gradients for edges */}
-        <svg style={{ position: 'absolute', width: 0, height: 0 }}>
-          <defs>
-            <linearGradient id="gradient-strong" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#8b5cf6" />
-              <stop offset="100%" stopColor="#06b6d4" />
-            </linearGradient>
-          </defs>
-        </svg>
+        {/* Show domain cards grid when no domain is selected */}
+        {!selectedDomain && nodes.length === 0 ? (
+          <div className="container mx-auto px-8 py-12">
+            <div className="text-center mb-12">
+              <h2 className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent mb-4">
+                ACM Research Domains
+              </h2>
+              <p className="text-gray-400 text-lg">
+                Select a domain to explore its knowledge graph and relationships
+              </p>
+            </div>
 
-        <ReactFlow
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
+              {ontologyData?.domains.map(domain => (
+                <button
+                  key={domain.id}
+                  onClick={() => setSelectedDomain(domain.id)}
+                  className="group relative backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl p-8 hover:bg-white/10 hover:border-white/20 transition-all duration-300 text-left hover:scale-105 hover:shadow-2xl"
+                  style={{
+                    boxShadow: `0 0 40px ${domain.color}20`
+                  }}
+                >
+                  {/* Gradient overlay on hover */}
+                  <div
+                    className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-10 transition-opacity duration-300"
+                    style={{
+                      background: `linear-gradient(135deg, ${domain.color}, ${domain.color}88)`
+                    }}
+                  />
+
+                  {/* Content */}
+                  <div className="relative z-10">
+                    {/* Icon */}
+                    <div
+                      className="w-16 h-16 rounded-xl flex items-center justify-center text-3xl mb-4 transition-transform duration-300 group-hover:scale-110 shadow-lg"
+                      style={{
+                        background: `linear-gradient(135deg, ${domain.color}dd, ${domain.color}88)`,
+                        boxShadow: `0 0 20px ${domain.color}40`
+                      }}
+                    >
+                      {domain.icon}
+                    </div>
+
+                    {/* Title */}
+                    <h3 className="text-xl font-bold text-white mb-3">
+                      {domain.name}
+                    </h3>
+
+                    {/* Description */}
+                    <p className="text-gray-400 text-sm leading-relaxed mb-4">
+                      {domain.description}
+                    </p>
+
+                    {/* Explore button */}
+                    <div className="flex items-center text-sm font-semibold"
+                         style={{ color: domain.color }}>
+                      <span>Explore Domain</span>
+                      <svg className="w-4 h-4 ml-2 transition-transform duration-300 group-hover:translate-x-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <>
+            {/* SVG Gradients for edges */}
+            <svg style={{ position: 'absolute', width: 0, height: 0 }}>
+              <defs>
+                <linearGradient id="gradient-strong" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#8b5cf6" />
+                  <stop offset="100%" stopColor="#06b6d4" />
+                </linearGradient>
+              </defs>
+            </svg>
+
+            <ReactFlow
           nodes={searchQuery ? filteredNodes : nodes}
           edges={edges}
           onNodesChange={onNodesChange}
@@ -755,6 +823,8 @@ function KnowledgeGraphContent() {
             </div>
           </Panel>
         </ReactFlow>
+          </>
+        )}
       </div>
 
       {/* Enhanced Node Details Sidebar */}
