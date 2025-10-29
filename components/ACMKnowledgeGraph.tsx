@@ -543,9 +543,9 @@ function KnowledgeGraphContent() {
                 </div>
               </div>
               <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-xl px-6 py-3 shadow-lg hover:bg-white/10 transition-all duration-300 group">
-                <div className="text-xs text-gray-400 mb-1">Active Domains</div>
+                <div className="text-xs text-gray-400 mb-1">Total Domains</div>
                 <div className="text-2xl font-bold bg-gradient-to-r from-teal-400 to-green-400 bg-clip-text text-transparent group-hover:scale-110 transition-transform">
-                  <AnimatedCounter value={activeDomains.length} />
+                  <AnimatedCounter value={ontologyData?.domains.length || 0} />
                 </div>
               </div>
             </div>
