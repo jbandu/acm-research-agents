@@ -421,37 +421,26 @@ function KnowledgeGraphContent() {
     );
   }, [nodes, searchQuery]);
 
-  // Domain stats with memoization
+  // Domain stats with memoization - Use official domains from acm_domains
   const domainStats = useMemo(() => {
     if (!ontologyData) return [];
 
-    const stats = new Map<string, { count: number; domain: Domain }>();
-
+    // Create a map of counts per domain_id
+    const countsByDomainId = new Map<string, number>();
     ontologyData.nodes.forEach(node => {
-      const domain = ontologyData.domains.find(d => d.id === node.domain_id);
-      if (domain) {
-        const current = stats.get(domain.id) || { count: 0, domain };
-        current.count++;
-        stats.set(domain.id, current);
+      if (node.domain_id) {
+        countsByDomainId.set(
+          node.domain_id,
+          (countsByDomainId.get(node.domain_id) || 0) + 1
+        );
       }
     });
 
-    return Array.from(stats.values());
-  }, [ontologyData]);
-
-  // Active domains (domains with at least one node) for filter buttons
-  const activeDomains = useMemo(() => {
-    if (!ontologyData) return [];
-
-    // Get unique domain IDs from nodes
-    const domainIdsWithNodes = new Set(
-      ontologyData.nodes
-        .map(n => n.domain_id)
-        .filter(Boolean) // Remove null/undefined
-    );
-
-    // Filter domains to only those with nodes
-    return ontologyData.domains.filter(d => domainIdsWithNodes.has(d.id));
+    // Return ALL official domains with their counts (0 if no nodes)
+    return ontologyData.domains.map(domain => ({
+      domain,
+      count: countsByDomainId.get(domain.id) || 0
+    }));
   }, [ontologyData]);
 
   // Export functionality
@@ -623,9 +612,9 @@ function KnowledgeGraphContent() {
                     : 'backdrop-blur-md bg-white/5 border border-white/10 text-gray-300 hover:bg-white/10'
                 }`}
               >
-                All Domains ({activeDomains.length})
+                All Domains ({ontologyData?.domains.length || 0})
               </button>
-              {activeDomains.map(domain => {
+              {ontologyData?.domains.map(domain => {
                 // Get count for this domain
                 const stat = domainStats.find(s => s.domain.id === domain.id);
                 const count = stat?.count || 0;
