@@ -407,6 +407,20 @@ export default function Home() {
               Watch as all 4 models process your query in parallel. See confidence scores, response times, and token usage as they happen.
             </p>
           </div>
+
+          {/* Feature 10 - Competitor Intelligence */}
+          <Link href="/competitors" className="bg-white rounded-lg p-6 border border-gray-200 hover:border-purple-500 hover:shadow-lg transition-all duration-300 block">
+            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center text-2xl mb-4">
+              🎯
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-3">Competitor Intelligence</h3>
+            <p className="text-gray-600">
+              Interactive world map of competitors. AI-powered weekly research and automated competitive intelligence newsletters.
+            </p>
+            <div className="mt-4 text-purple-600 font-semibold flex items-center gap-2">
+              View Competitors →
+            </div>
+          </Link>
         </div>
       </div>
 
