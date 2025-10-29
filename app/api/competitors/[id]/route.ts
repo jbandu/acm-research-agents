@@ -4,10 +4,10 @@ import { query } from '@/lib/db';
 // GET /api/competitors/[id] - Get specific competitor with all related data
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     // Get competitor details
     const competitorResult = await query(
@@ -72,10 +72,10 @@ export async function GET(
 // PUT /api/competitors/[id] - Update a competitor
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
 
     // Build dynamic UPDATE query
@@ -151,10 +151,10 @@ export async function PUT(
 // DELETE /api/competitors/[id] - Delete a competitor (soft delete)
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     // Soft delete by setting is_active to false
     const result = await query(

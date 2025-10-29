@@ -5,10 +5,10 @@ import Anthropic from '@anthropic-ai/sdk';
 // POST /api/competitors/[id]/research - Trigger AI research on a competitor
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     // Get competitor details
     const competitorResult = await query(
