@@ -9,10 +9,12 @@ export async function GET(request: NextRequest) {
     const domainId = searchParams.get('domainId');
     const nodeType = searchParams.get('nodeType');
 
-    // Fetch domains
+    // Fetch domains (only first 15 official domains)
     const domainsResult = await query(`
       SELECT * FROM acm_domains
+      WHERE display_order <= 15 OR display_order IS NULL
       ORDER BY display_order, name
+      LIMIT 15
     `);
 
     // Fetch nodes with optional filtering
