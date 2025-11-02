@@ -25,13 +25,13 @@ export default function SignInPage() {
       });
 
       if (result?.error) {
-        setError(result.error);
+        setError(String(result.error));
       } else {
         router.push('/');
         router.refresh();
       }
-    } catch (error) {
-      setError('An error occurred during sign in');
+    } catch (error: any) {
+      setError(String(error?.message || 'An error occurred during sign in'));
     } finally {
       setLoading(false);
     }
@@ -61,7 +61,7 @@ export default function SignInPage() {
                   </svg>
                 </div>
                 <div className="ml-3">
-                  <p className="text-sm text-red-800">{error}</p>
+                  <p className="text-sm text-red-800">{String(error)}</p>
                 </div>
               </div>
             </div>
