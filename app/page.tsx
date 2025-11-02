@@ -43,10 +43,20 @@ export default function Home() {
         }),
       ]);
 
-      const workflowsData = await workflowsRes.json().catch(() => ({ workflows: [] }));
-      const historyData = await statsRes.json().catch(() => ({ queries: [] }));
+      const workflowsData = await workflowsRes.json().catch((err) => {
+        console.error('Failed to parse workflows JSON:', err);
+        return { workflows: [] };
+      });
+      const historyData = await statsRes.json().catch((err) => {
+        console.error('Failed to parse history JSON:', err);
+        return { queries: [] };
+      });
 
-      setWorkflows(Array.isArray(workflowsData.workflows) ? workflowsData.workflows : []);
+      console.log('Workflows data:', workflowsData);
+      console.log('History data:', historyData);
+
+      const workflowsList = Array.isArray(workflowsData.workflows) ? workflowsData.workflows : [];
+      setWorkflows(workflowsList);
 
       // Calculate stats
       const queries = Array.isArray(historyData.queries) ? historyData.queries : [];
@@ -457,14 +467,14 @@ export default function Home() {
                   className="bg-white rounded-lg p-6 border border-gray-200 hover:border-blue-500 hover:shadow-lg transition-all duration-300"
                 >
                   <div className="flex items-start justify-between mb-4">
-                    <div className="text-3xl">{workflow.icon || '🔬'}</div>
+                    <div className="text-3xl">{String(workflow.icon || '🔬')}</div>
                     <span className="text-xs font-medium px-3 py-1 bg-blue-100 text-blue-800 rounded-full">
-                      {workflow.domain}
+                      {String(workflow.domain || 'General')}
                     </span>
                   </div>
 
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{workflow.name}</h3>
-                  <p className="text-sm text-gray-600 mb-4 line-clamp-2">{workflow.description}</p>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{String(workflow.name || 'Workflow')}</h3>
+                  <p className="text-sm text-gray-600 mb-4 line-clamp-2">{String(workflow.description || '')}</p>
 
                   <div className="flex justify-between items-center pt-4 border-t border-gray-100">
                     <span className="text-xs text-gray-500">
