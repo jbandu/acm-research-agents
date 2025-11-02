@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { queryAllLLMs, LLMResponse } from '@/lib/llm-clients';
 import { query } from '@/lib/db';
 import { requireAuth } from '@/lib/session';
+import { searchGooglePatents, createPatentContext, PatentResult } from '@/lib/google-patents';
 
 export async function POST(request: NextRequest) {
   try {
@@ -72,9 +73,49 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Query all LLMs in parallel
+    // Search Google Patents FIRST (before LLMs)
+    console.log('Searching Google Patents...');
+    const patentResults: PatentResult[] = await searchGooglePatents(query_text, 10);
+    console.log(`Found ${patentResults.length} patents`);
+
+    // Save patent search to database
+    let patentSearchId: string | null = null;
+    if (patentResults.length > 0) {
+      const patentSearchResult = await query(
+        'INSERT INTO patent_searches (query_id, search_query, results_count) VALUES ($1, $2, $3) RETURNING id',
+        [queryId, query_text, patentResults.length]
+      );
+      patentSearchId = patentSearchResult.rows[0].id;
+
+      // Save individual patent results
+      for (const patent of patentResults) {
+        await query(
+          `INSERT INTO patent_results
+           (search_id, patent_number, title, assignee, publication_date, url, snippet, pdf_url, relevance_score)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+           ON CONFLICT (search_id, patent_number) DO NOTHING`,
+          [
+            patentSearchId,
+            patent.patentNumber,
+            patent.title,
+            patent.assignee,
+            patent.publicationDate,
+            patent.url,
+            patent.snippet,
+            patent.pdfUrl || null,
+            patent.relevanceScore || 0
+          ]
+        );
+      }
+    }
+
+    // Create patent context for LLM prompts
+    const patentContext = createPatentContext(patentResults);
+    const enhancedQueryText = patentContext ? query_text + patentContext : query_text;
+
+    // Query all LLMs in parallel (with patent context)
     const llmResponses = await queryAllLLMs({
-      queryText: query_text,
+      queryText: enhancedQueryText,
       systemPrompt: systemPromptToUse,
     });
 
@@ -113,6 +154,8 @@ export async function POST(request: NextRequest) {
       query_text,
       responses: llmResponses,
       consensus,
+      patents: patentResults, // Include patent results
+      patent_count: patentResults.length,
     });
   } catch (error: any) {
     console.error('Query API error:', error);
