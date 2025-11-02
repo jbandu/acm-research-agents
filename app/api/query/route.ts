@@ -78,34 +78,40 @@ export async function POST(request: NextRequest) {
     const patentResults: PatentResult[] = await searchGooglePatents(query_text, 10);
     console.log(`Found ${patentResults.length} patents`);
 
-    // Save patent search to database
+    // Save patent search to database (gracefully handle missing tables)
     let patentSearchId: string | null = null;
     if (patentResults.length > 0) {
-      const patentSearchResult = await query(
-        'INSERT INTO patent_searches (query_id, search_query, results_count) VALUES ($1, $2, $3) RETURNING id',
-        [queryId, query_text, patentResults.length]
-      );
-      patentSearchId = patentSearchResult.rows[0].id;
-
-      // Save individual patent results
-      for (const patent of patentResults) {
-        await query(
-          `INSERT INTO patent_results
-           (search_id, patent_number, title, assignee, publication_date, url, snippet, pdf_url, relevance_score)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-           ON CONFLICT (search_id, patent_number) DO NOTHING`,
-          [
-            patentSearchId,
-            patent.patentNumber,
-            patent.title,
-            patent.assignee,
-            patent.publicationDate,
-            patent.url,
-            patent.snippet,
-            patent.pdfUrl || null,
-            patent.relevanceScore || 0
-          ]
+      try {
+        const patentSearchResult = await query(
+          'INSERT INTO patent_searches (query_id, search_query, results_count) VALUES ($1, $2, $3) RETURNING id',
+          [queryId, query_text, patentResults.length]
         );
+        patentSearchId = patentSearchResult.rows[0].id;
+
+        // Save individual patent results
+        for (const patent of patentResults) {
+          await query(
+            `INSERT INTO patent_results
+             (search_id, patent_number, title, assignee, publication_date, url, snippet, pdf_url, relevance_score)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+             ON CONFLICT (search_id, patent_number) DO NOTHING`,
+            [
+              patentSearchId,
+              patent.patentNumber,
+              patent.title,
+              patent.assignee,
+              patent.publicationDate,
+              patent.url,
+              patent.snippet,
+              patent.pdfUrl || null,
+              patent.relevanceScore || 0
+            ]
+          );
+        }
+      } catch (patentDbError: any) {
+        // If patent tables don't exist yet, just log warning and continue
+        console.warn('Patent tables not available (run migration 008):', patentDbError.message);
+        // Patents will still be returned in API response, just not saved to DB
       }
     }
 
