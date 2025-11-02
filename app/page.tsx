@@ -33,28 +33,37 @@ export default function Home() {
   const fetchData = async () => {
     try {
       const [workflowsRes, statsRes] = await Promise.all([
-        fetch('/api/workflows'),
-        fetch('/api/history?limit=1000'), // Get stats from history
+        fetch('/api/workflows').catch(err => {
+          console.error('Failed to fetch workflows:', err);
+          return { ok: false, json: async () => ({ workflows: [] }) };
+        }),
+        fetch('/api/history?limit=1000').catch(err => {
+          console.error('Failed to fetch history:', err);
+          return { ok: false, json: async () => ({ queries: [] }) };
+        }),
       ]);
 
-      const workflowsData = await workflowsRes.json();
-      const historyData = await statsRes.json();
+      const workflowsData = await workflowsRes.json().catch(() => ({ workflows: [] }));
+      const historyData = await statsRes.json().catch(() => ({ queries: [] }));
 
-      setWorkflows(workflowsData.workflows || []);
+      setWorkflows(Array.isArray(workflowsData.workflows) ? workflowsData.workflows : []);
 
       // Calculate stats
-      const queries = historyData.queries || [];
+      const queries = Array.isArray(historyData.queries) ? historyData.queries : [];
       const consensusQueries = queries.filter((q: any) =>
         q.consensus_level === 'high' || q.consensus_level === 'medium'
       );
 
       setStats({
         totalQueries: queries.length,
-        totalWorkflows: workflowsData.workflows?.length || 0,
+        totalWorkflows: Array.isArray(workflowsData.workflows) ? workflowsData.workflows.length : 0,
         avgConsensusRate: queries.length > 0 ? Math.round((consensusQueries.length / queries.length) * 100) : 0,
       });
     } catch (error) {
       console.error('Error fetching data:', error);
+      // Set safe defaults on error
+      setWorkflows([]);
+      setStats({ totalQueries: 0, totalWorkflows: 0, avgConsensusRate: 0 });
     } finally {
       setLoading(false);
     }

@@ -12,7 +12,6 @@ export const config = {
     '/workflows/:path*',
     '/history/:path*',
     '/api/query/:path*',
-    '/api/workflows/:path*',
-    '/api/history/:path*',
+    // Note: /api/workflows and /api/history are publicly accessible for the home page
   ],
 };
