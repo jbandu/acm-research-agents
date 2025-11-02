@@ -188,16 +188,18 @@ export default function HistoryItemCard({
     }
 
     // Download
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    if (typeof window !== 'undefined') {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
 
-    alert(`Exported to ${filename}`);
+      alert(`Exported to ${filename}`);
+    }
   };
 
   return (
@@ -355,8 +357,10 @@ export default function HistoryItemCard({
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      navigator.clipboard.writeText(query.query_text);
-                      alert('Query copied to clipboard!');
+                      if (typeof window !== 'undefined' && navigator.clipboard) {
+                        navigator.clipboard.writeText(query.query_text);
+                        alert('Query copied to clipboard!');
+                      }
                     }}
                     className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
                   >

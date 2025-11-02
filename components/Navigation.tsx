@@ -20,6 +20,8 @@ export default function Navigation() {
 
   // Close dropdowns when clicking outside
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+
     function handleClickOutside(event: MouseEvent) {
       if (intelligenceRef.current && !intelligenceRef.current.contains(event.target as Node)) {
         setIsIntelligenceOpen(false);
