@@ -13,11 +13,6 @@ export default function Navigation() {
   const intelligenceRef = useRef<HTMLDivElement>(null);
   const adminRef = useRef<HTMLDivElement>(null);
 
-  // Don't show navigation on auth pages
-  if (pathname?.startsWith('/auth/')) {
-    return null;
-  }
-
   // Close dropdowns when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -34,6 +29,11 @@ export default function Navigation() {
   }, []);
 
   const isAdmin = (session?.user as any)?.role === 'admin';
+
+  // Don't show navigation on auth pages (check AFTER all hooks)
+  if (pathname?.startsWith('/auth/')) {
+    return null;
+  }
 
   return (
     <nav className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
