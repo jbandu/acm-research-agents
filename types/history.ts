@@ -4,7 +4,7 @@ export interface Query {
   id: string;
   workflow_id?: string;
   query_text: string;
-  created_by: string;
+  user_id: string;
   status: 'processing' | 'completed' | 'failed';
   created_at: Date;
 }
