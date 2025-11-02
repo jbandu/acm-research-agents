@@ -11,6 +11,41 @@ interface HistoryItemCardProps {
   onReRun: (queryId: string) => void;
 }
 
+const LLM_CONFIGS = {
+  claude: {
+    name: 'Claude',
+    color: 'from-purple-500 to-pink-500',
+    bgColor: 'bg-purple-50',
+    borderColor: 'border-purple-200',
+    textColor: 'text-purple-700',
+    icon: '🤖',
+  },
+  openai: {
+    name: 'GPT-4',
+    color: 'from-green-500 to-teal-500',
+    bgColor: 'bg-green-50',
+    borderColor: 'border-green-200',
+    textColor: 'text-green-700',
+    icon: '🧠',
+  },
+  gemini: {
+    name: 'Gemini',
+    color: 'from-blue-500 to-cyan-500',
+    bgColor: 'bg-blue-50',
+    borderColor: 'border-blue-200',
+    textColor: 'text-blue-700',
+    icon: '💎',
+  },
+  grok: {
+    name: 'Grok',
+    color: 'from-orange-500 to-red-500',
+    bgColor: 'bg-orange-50',
+    borderColor: 'border-orange-200',
+    textColor: 'text-orange-700',
+    icon: '⚡',
+  },
+};
+
 export default function HistoryItemCard({
   query,
   isExpanded,
@@ -20,6 +55,7 @@ export default function HistoryItemCard({
 }: HistoryItemCardProps) {
   const [responses, setResponses] = useState<LLMResponse[]>([]);
   const [loadingDetails, setLoadingDetails] = useState(false);
+  const [expandedResponse, setExpandedResponse] = useState<string | null>(null);
 
   useEffect(() => {
     if (isExpanded && responses.length === 0) {
@@ -43,41 +79,13 @@ export default function HistoryItemCard({
   const getConsensusColor = (level?: string) => {
     switch (level) {
       case 'high':
-        return 'bg-green-100 text-green-800 border-green-200';
+        return 'bg-gradient-to-r from-green-500 to-emerald-500';
       case 'medium':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+        return 'bg-gradient-to-r from-yellow-500 to-orange-500';
       case 'low':
-        return 'bg-orange-100 text-orange-800 border-orange-200';
+        return 'bg-gradient-to-r from-orange-500 to-red-500';
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
-    }
-  };
-
-  const getConsensusIcon = (level?: string) => {
-    switch (level) {
-      case 'high':
-        return '✅';
-      case 'medium':
-        return '⚠️';
-      case 'low':
-        return '❌';
-      default:
-        return '❔';
-    }
-  };
-
-  const getLLMColor = (provider: string) => {
-    switch (provider) {
-      case 'claude':
-        return 'text-claude';
-      case 'openai':
-        return 'text-openai';
-      case 'gemini':
-        return 'text-gemini';
-      case 'grok':
-        return 'text-grok';
-      default:
-        return 'text-gray-900';
+        return 'bg-gradient-to-r from-gray-400 to-gray-500';
     }
   };
 
@@ -91,183 +99,85 @@ export default function HistoryItemCard({
     });
   };
 
-  const exportQuery = () => {
-    if (responses.length === 0) {
-      alert('No responses to export. Expand the query first to load responses.');
-      return;
-    }
-
-    const exportData = {
-      query_id: query.id,
-      query_text: query.query_text,
-      workflow: query.workflow?.name || 'Generic',
-      created_at: query.created_at,
-      status: query.status,
-      consensus: query.consensus,
-      execution_time_seconds: query.execution?.execution_time_seconds,
-      responses: responses.map(r => ({
-        provider: r.llm_provider,
-        model: r.model_name,
-        response: r.response_text,
-        confidence_score: r.confidence_score,
-        sources: r.sources,
-        tokens_used: r.tokens_used,
-        response_time_ms: r.response_time_ms,
-        error: r.error
-      }))
-    };
-
-    // Export format selection
-    const format = prompt('Export format?\n1. JSON (full data)\n2. Markdown (readable)\n3. CSV (tabular)\n\nEnter 1, 2, or 3:');
-
-    if (!format) return;
-
-    let blob: Blob;
-    let filename: string;
-
-    switch(format) {
-      case '1': // JSON
-        blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-        filename = `query-${query.id}.json`;
-        break;
-
-      case '2': // Markdown
-        let markdown = `# Research Query Results\n\n`;
-        markdown += `**Query:** ${query.query_text}\n\n`;
-        markdown += `**Workflow:** ${exportData.workflow}\n`;
-        markdown += `**Created:** ${formatDate(query.created_at)}\n`;
-        markdown += `**Status:** ${query.status}\n\n`;
-
-        if (query.consensus) {
-          markdown += `## Consensus\n\n`;
-          markdown += `- **Level:** ${query.consensus.consensus_level}\n\n`;
-        }
-
-        markdown += `## Responses\n\n`;
-        responses.forEach(r => {
-          markdown += `### ${r.llm_provider.toUpperCase()} - ${r.model_name}\n\n`;
-          if (r.error) {
-            markdown += `**Error:** ${r.error}\n\n`;
-          } else {
-            markdown += `${r.response_text}\n\n`;
-            markdown += `**Metadata:**\n`;
-            if (r.confidence_score) markdown += `- Confidence: ${r.confidence_score}%\n`;
-            markdown += `- Response Time: ${(r.response_time_ms / 1000).toFixed(2)}s\n`;
-            if (r.tokens_used) markdown += `- Tokens: ${r.tokens_used.toLocaleString()}\n`;
-            markdown += `\n`;
-          }
-          markdown += `---\n\n`;
-        });
-
-        blob = new Blob([markdown], { type: 'text/markdown' });
-        filename = `query-${query.id}.md`;
-        break;
-
-      case '3': // CSV
-        let csv = 'Provider,Model,Confidence,ResponseTime(s),Tokens,Response,Error\n';
-        responses.forEach(r => {
-          const row = [
-            r.llm_provider,
-            r.model_name,
-            r.confidence_score || '',
-            (r.response_time_ms / 1000).toFixed(2),
-            r.tokens_used || '',
-            `"${(r.response_text || '').replace(/"/g, '""').substring(0, 500)}..."`,
-            r.error || ''
-          ];
-          csv += row.join(',') + '\n';
-        });
-
-        blob = new Blob([csv], { type: 'text/csv' });
-        filename = `query-${query.id}.csv`;
-        break;
-
-      default:
-        alert('Invalid format selected');
-        return;
-    }
-
-    // Download
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-
-    alert(`Exported to ${filename}`);
-  };
-
   return (
-    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow">
-      {/* Compact View */}
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300">
+      {/* Compact View - Header */}
       <div
         onClick={onToggleExpand}
-        className="px-6 py-4 cursor-pointer hover:bg-gray-50"
+        className="px-6 py-5 cursor-pointer hover:bg-gray-50 transition-colors"
       >
-        <div className="flex items-start justify-between">
-          {/* Left: Query Text and Metadata */}
-          <div className="flex-1 min-w-0 mr-4">
-            <div className="flex items-center space-x-2 mb-2">
+        <div className="flex items-start justify-between gap-4">
+          {/* Left side - Query info */}
+          <div className="flex-1 min-w-0">
+            {/* Badges Row */}
+            <div className="flex flex-wrap items-center gap-2 mb-3">
               {/* Workflow Badge */}
               {query.workflow && (
-                <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800">
-                  {query.workflow.icon} {query.workflow.name}
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-sm">
+                  <span className="mr-1">{query.workflow.icon}</span>
+                  {query.workflow.name}
                 </span>
               )}
 
               {/* Consensus Badge */}
               {query.consensus && (
-                <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium border ${getConsensusColor(query.consensus.consensus_level)}`}>
-                  {getConsensusIcon(query.consensus.consensus_level)} {query.consensus.consensus_level} consensus
+                <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium text-white shadow-sm ${getConsensusColor(query.consensus.consensus_level)}`}>
+                  {query.consensus.consensus_level === 'high' && '✅'}
+                  {query.consensus.consensus_level === 'medium' && '⚠️'}
+                  {query.consensus.consensus_level === 'low' && '❌'}
+                  <span className="ml-1 capitalize">{query.consensus.consensus_level} Consensus</span>
                 </span>
               )}
 
               {/* Status Badge */}
-              <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
-                query.status === 'completed' ? 'bg-green-100 text-green-800' :
-                query.status === 'processing' ? 'bg-blue-100 text-blue-800' :
-                'bg-red-100 text-red-800'
+              <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                query.status === 'completed'
+                  ? 'bg-green-100 text-green-800'
+                  : query.status === 'processing'
+                  ? 'bg-blue-100 text-blue-800'
+                  : 'bg-red-100 text-red-800'
               }`}>
-                {query.status}
+                {query.status === 'completed' && '✓'}
+                {query.status === 'processing' && '⏳'}
+                {query.status === 'failed' && '✗'}
+                <span className="ml-1 capitalize">{query.status}</span>
+              </span>
+
+              {/* Response Count Badge */}
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                💬 {query.response_count || 0} Responses
               </span>
             </div>
 
             {/* Query Text */}
-            <p className="text-gray-900 text-sm line-clamp-2 mb-2">
+            <h3 className="text-base font-semibold text-gray-900 mb-2 line-clamp-2 leading-relaxed">
               {query.query_text}
-            </p>
+            </h3>
 
-            {/* Metadata */}
-            <div className="flex items-center space-x-4 text-xs text-gray-500">
-              <span className="flex items-center">
-                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            {/* Metadata Row */}
+            <div className="flex flex-wrap items-center gap-4 text-xs text-gray-500">
+              <span className="flex items-center gap-1">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
                 {formatDate(query.created_at)}
               </span>
 
               {query.execution && query.execution.execution_time_seconds && (
-                <span className="flex items-center">
-                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <span className="flex items-center gap-1">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
-                  {query.execution.execution_time_seconds}s
+                  {query.execution.execution_time_seconds.toFixed(1)}s
                 </span>
               )}
-
-              <span>
-                {query.response_count || 0} responses
-              </span>
             </div>
           </div>
 
-          {/* Right: Expand Icon */}
-          <button className="flex-shrink-0 text-gray-400 hover:text-gray-600">
+          {/* Right side - Expand button */}
+          <button className="flex-shrink-0 p-2 rounded-full hover:bg-gray-200 transition-colors">
             <svg
-              className={`w-5 h-5 transform transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+              className={`w-5 h-5 text-gray-600 transform transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -280,71 +190,133 @@ export default function HistoryItemCard({
 
       {/* Expanded View */}
       {isExpanded && (
-        <div className="border-t border-gray-200 bg-gray-50">
+        <div className="border-t border-gray-200 bg-gradient-to-br from-gray-50 to-white">
           {loadingDetails ? (
-            <div className="px-6 py-8 text-center">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-              <p className="mt-2 text-sm text-gray-600">Loading responses...</p>
+            <div className="px-6 py-12 text-center">
+              <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-purple-600 border-t-transparent"></div>
+              <p className="mt-4 text-sm text-gray-600 font-medium">Loading responses...</p>
             </div>
           ) : (
             <>
               {/* Full Query Text */}
-              <div className="px-6 py-4 bg-white border-b border-gray-200">
-                <h4 className="text-sm font-medium text-gray-700 mb-2">Full Query</h4>
-                <p className="text-sm text-gray-900 whitespace-pre-wrap">{query.query_text}</p>
+              <div className="px-6 py-5 bg-white border-b border-gray-100">
+                <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                  <span className="text-lg">📝</span>
+                  Full Query
+                </h4>
+                <p className="text-sm text-gray-800 leading-relaxed whitespace-pre-wrap bg-gray-50 rounded-lg p-4 border border-gray-200">
+                  {query.query_text}
+                </p>
               </div>
 
-              {/* LLM Responses */}
-              <div className="px-6 py-4">
-                <h4 className="text-sm font-medium text-gray-700 mb-4">LLM Responses</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {responses.map((response) => (
-                    <div
-                      key={response.id}
-                      className="bg-white border border-gray-200 rounded-lg p-4"
-                    >
-                      {/* Header */}
-                      <div className="flex items-center justify-between mb-3">
-                        <h5 className={`text-sm font-semibold capitalize ${getLLMColor(response.llm_provider)}`}>
-                          {response.llm_provider}
-                        </h5>
-                        <span className="text-xs text-gray-500">{response.model_name}</span>
-                      </div>
+              {/* LLM Responses Grid */}
+              <div className="px-6 py-6">
+                <h4 className="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
+                  <span className="text-lg">🤝</span>
+                  AI Model Responses ({responses.length})
+                </h4>
 
-                      {/* Response or Error */}
-                      {response.error ? (
-                        <div className="text-xs text-red-600 bg-red-50 rounded p-2">
-                          Error: {response.error}
-                        </div>
-                      ) : (
-                        <>
-                          <p className="text-xs text-gray-700 line-clamp-4 mb-3">
-                            {response.response_text}
-                          </p>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  {responses.map((response) => {
+                    const config = LLM_CONFIGS[response.llm_provider as keyof typeof LLM_CONFIGS];
+                    const isResponseExpanded = expandedResponse === response.id;
 
-                          {/* Stats */}
-                          <div className="flex items-center justify-between text-xs text-gray-500 pt-3 border-t border-gray-100">
-                            {response.confidence_score && (
-                              <span>Confidence: {response.confidence_score}%</span>
-                            )}
-                            <span>{(response.response_time_ms / 1000).toFixed(2)}s</span>
+                    return (
+                      <div
+                        key={response.id}
+                        className={`${config.bgColor} border-2 ${config.borderColor} rounded-xl p-5 transition-all duration-300 hover:shadow-md`}
+                      >
+                        {/* Response Header */}
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex items-center gap-2">
+                            <span className="text-2xl">{config.icon}</span>
+                            <div>
+                              <h5 className={`text-sm font-bold ${config.textColor}`}>
+                                {config.name}
+                              </h5>
+                              <p className="text-xs text-gray-600">{response.model_name}</p>
+                            </div>
                           </div>
-                        </>
-                      )}
-                    </div>
-                  ))}
+
+                          {response.confidence_score && (
+                            <div className="flex flex-col items-end">
+                              <span className="text-xs text-gray-600 mb-1">Confidence</span>
+                              <div className="flex items-center gap-2">
+                                <div className="w-16 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                  <div
+                                    className={`h-full bg-gradient-to-r ${config.color} transition-all duration-500`}
+                                    style={{ width: `${response.confidence_score}%` }}
+                                  />
+                                </div>
+                                <span className={`text-xs font-bold ${config.textColor}`}>
+                                  {response.confidence_score}%
+                                </span>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Error or Response */}
+                        {response.error ? (
+                          <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                            <p className="text-xs text-red-700 font-medium">❌ Error: {response.error}</p>
+                          </div>
+                        ) : (
+                          <>
+                            {/* Response Text */}
+                            <div className={`text-sm text-gray-800 leading-relaxed ${isResponseExpanded ? '' : 'line-clamp-4'} mb-3`}>
+                              {response.response_text}
+                            </div>
+
+                            {/* Expand/Collapse Button */}
+                            {response.response_text.length > 200 && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setExpandedResponse(isResponseExpanded ? null : response.id);
+                                }}
+                                className={`text-xs font-medium ${config.textColor} hover:underline flex items-center gap-1`}
+                              >
+                                {isResponseExpanded ? '▼ Show Less' : '▶ Read More'}
+                              </button>
+                            )}
+
+                            {/* Response Stats */}
+                            <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-200">
+                              <div className="flex items-center gap-3 text-xs text-gray-600">
+                                {response.tokens_used && (
+                                  <span className="flex items-center gap-1">
+                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
+                                    </svg>
+                                    {response.tokens_used.toLocaleString()} tokens
+                                  </span>
+                                )}
+                                <span className="flex items-center gap-1">
+                                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                  </svg>
+                                  {(response.response_time_ms / 1000).toFixed(2)}s
+                                </span>
+                              </div>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
-              {/* Actions */}
+              {/* Actions Bar */}
               <div className="px-6 py-4 bg-white border-t border-gray-200 flex items-center justify-between">
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center gap-2">
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       onReRun(query.id);
                     }}
-                    className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                    className="inline-flex items-center px-4 py-2 border-2 border-purple-300 rounded-lg text-sm font-medium text-purple-700 bg-white hover:bg-purple-50 transition-colors"
                   >
                     <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -358,34 +330,23 @@ export default function HistoryItemCard({
                       navigator.clipboard.writeText(query.query_text);
                       alert('Query copied to clipboard!');
                     }}
-                    className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                    className="inline-flex items-center px-4 py-2 border-2 border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
                   >
                     <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                     </svg>
-                    Copy Query
-                  </button>
-
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      exportQuery();
-                    }}
-                    className="inline-flex items-center px-4 py-2 border border-blue-300 rounded-lg text-sm font-medium text-blue-700 bg-white hover:bg-blue-50"
-                  >
-                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                    </svg>
-                    Export
+                    Copy
                   </button>
                 </div>
 
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    onDelete(query.id);
+                    if (confirm('Are you sure you want to delete this query?')) {
+                      onDelete(query.id);
+                    }
                   }}
-                  className="inline-flex items-center px-4 py-2 border border-red-300 rounded-lg text-sm font-medium text-red-700 bg-white hover:bg-red-50"
+                  className="inline-flex items-center px-4 py-2 border-2 border-red-300 rounded-lg text-sm font-medium text-red-700 bg-white hover:bg-red-50 transition-colors"
                 >
                   <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />

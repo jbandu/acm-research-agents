@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git fetch:*)",
+      "Bash(git pull:*)",
+      "Bash(node -e:*)",
+      "Bash(npx tsx:*)",
+      "Bash(source .env.local)",
+      "Bash(NODE_OPTIONS='--env-file=.env.local' npx tsx:*)",
+      "Bash(export DATABASE_URL:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(curl:*)",
+      "Bash(node scripts/test-password.js:*)",
+      "Bash(psql:*)",
+      "Bash(node:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
