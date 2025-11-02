@@ -6,7 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "seed:test": "node scripts/seed-test-data.js"
   },
   "keywords": [
     "biotech",
@@ -37,10 +42,12 @@
     "typescript": "^5.9.3"
   },
   "devDependencies": {
+    "@playwright/test": "^1.48.0",
     "@tailwindcss/postcss": "^4.1.16",
     "@types/bcryptjs": "^2.4.6",
     "@types/pg": "^8.15.5",
     "autoprefixer": "^10.4.21",
+    "dotenv": "^16.4.5",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.16"
   }
