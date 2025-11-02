@@ -11,9 +11,11 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '20');
     const offset = (page - 1) * limit;
 
-    // Sorting
-    const sortBy = searchParams.get('sortBy') || 'created_at';
-    const sortOrder = searchParams.get('sortOrder') || 'desc';
+    // Sorting - validate to prevent SQL injection
+    const sortByParam = searchParams.get('sortBy') || 'created_at';
+    const validSortColumns = ['created_at', 'status', 'query_text'];
+    const sortBy = validSortColumns.includes(sortByParam) ? sortByParam : 'created_at';
+    const sortOrder = searchParams.get('sortOrder')?.toLowerCase() === 'asc' ? 'asc' : 'desc';
 
     // Filters
     const workflows = searchParams.get('workflows')?.split(',').filter(Boolean);
@@ -95,28 +97,39 @@ export async function GET(request: NextRequest) {
       /SELECT[\s\S]*?FROM queries/,
       'SELECT COUNT(DISTINCT q.id) as total FROM queries'
     );
-    const countResult = await query(countQuery, params);
+    const countResult = await query(countQuery, params).catch(err => {
+      console.error('Count query error:', err);
+      return { rows: [{ total: 0 }] };
+    });
     const total = parseInt(countResult.rows[0]?.total || '0');
 
     // Add sorting and pagination
-    queryText += ` ORDER BY q.${sortBy} ${sortOrder.toUpperCase()}`;
+    queryText += ` ORDER BY q.${sortBy} ${sortOrder}`;
     queryText += ` LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
     params.push(limit, offset);
 
-    const result = await query(queryText, params);
+    const result = await query(queryText, params).catch(err => {
+      console.error('Main query error:', err);
+      return { rows: [] };
+    });
 
     // For queries with LLM providers filter, we need to check responses
-    let queries = result.rows;
-    if (llmProviders && llmProviders.length > 0) {
+    let queries = result.rows || [];
+    if (llmProviders && llmProviders.length > 0 && queries.length > 0) {
       queries = await Promise.all(
         queries.map(async (q) => {
-          const responsesResult = await query(
-            `SELECT DISTINCT llm_provider
-             FROM llm_responses
-             WHERE query_id = $1 AND llm_provider = ANY($2)`,
-            [q.id, llmProviders]
-          );
-          return responsesResult.rows.length > 0 ? q : null;
+          try {
+            const responsesResult = await query(
+              `SELECT DISTINCT llm_provider
+               FROM llm_responses
+               WHERE query_id = $1 AND llm_provider = ANY($2)`,
+              [q.id, llmProviders]
+            );
+            return responsesResult.rows.length > 0 ? q : null;
+          } catch (err) {
+            console.error('Provider filter error:', err);
+            return q; // Include query if filter fails
+          }
         })
       );
       queries = queries.filter(Boolean);
@@ -159,9 +172,16 @@ export async function GET(request: NextRequest) {
     });
   } catch (error: any) {
     console.error('History GET error:', error);
-    return NextResponse.json(
-      { error: error.message || 'Failed to fetch history' },
-      { status: 500 }
-    );
+    // Return empty results instead of 500 to prevent client-side crashes
+    return NextResponse.json({
+      queries: [],
+      pagination: {
+        page: 1,
+        limit: 20,
+        total: 0,
+        totalPages: 0,
+      },
+      error: error.message || 'Failed to fetch history',
+    });
   }
 }
