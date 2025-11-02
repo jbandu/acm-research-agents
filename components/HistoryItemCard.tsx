@@ -44,6 +44,14 @@ const LLM_CONFIGS = {
     textColor: 'text-orange-700',
     icon: '⚡',
   },
+  ollama: {
+    name: 'Llama (Local)',
+    color: 'from-indigo-500 to-violet-500',
+    bgColor: 'bg-indigo-50',
+    borderColor: 'border-indigo-200',
+    textColor: 'text-indigo-700',
+    icon: '🦙',
+  },
 };
 
 export default function HistoryItemCard({

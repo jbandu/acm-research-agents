@@ -1,6 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import OpenAI from 'openai';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { queryOllama, isOllamaAvailable } from './llms/ollama';
 
 // Initialize clients
 const anthropic = new Anthropic({
@@ -14,7 +15,7 @@ const openai = new OpenAI({
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY || '');
 
 export interface LLMResponse {
-  provider: 'claude' | 'openai' | 'gemini' | 'grok';
+  provider: 'claude' | 'openai' | 'gemini' | 'grok' | 'ollama';
   model: string;
   responseText: string;
   confidenceScore?: number;
@@ -217,14 +218,23 @@ export async function queryGrok(input: QueryInput): Promise<LLMResponse> {
   }
 }
 
-// Query all LLMs in parallel
+// Query all LLMs in parallel (including local Ollama if available)
 export async function queryAllLLMs(input: QueryInput): Promise<LLMResponse[]> {
-  const results = await Promise.all([
+  const queries = [
     queryClaude(input),
     queryOpenAI(input),
     queryGemini(input),
     queryGrok(input),
-  ]);
+  ];
 
+  // Add Ollama if it's available
+  const ollamaEnabled = process.env.ENABLE_OLLAMA !== 'false'; // Default to enabled
+  if (ollamaEnabled) {
+    queries.push(
+      queryOllama(input.queryText, input.systemPrompt) as Promise<LLMResponse>
+    );
+  }
+
+  const results = await Promise.all(queries);
   return results;
 }
