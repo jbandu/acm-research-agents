@@ -86,7 +86,7 @@ export async function queryOllama(
           num_predict: config.maxTokens,
         },
       }),
-      signal: AbortSignal.timeout(120000), // 2 minute timeout
+      signal: AbortSignal.timeout(300000), // 5 minute timeout for complex queries
     });
 
     if (!response.ok) {
