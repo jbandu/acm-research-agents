@@ -52,8 +52,8 @@ export default function Home() {
         return { queries: [] };
       });
 
-      console.log('Workflows data:', workflowsData);
-      console.log('History data:', historyData);
+      console.log('Workflows data:', JSON.stringify(workflowsData, null, 2));
+      console.log('History data:', JSON.stringify(historyData, null, 2));
 
       const workflowsList = Array.isArray(workflowsData.workflows) ? workflowsData.workflows : [];
       setWorkflows(workflowsList);

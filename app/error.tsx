@@ -36,11 +36,11 @@ export default function Error({
           Something went wrong!
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
-          {error.message || 'An unexpected error occurred'}
+          {String(error?.message || 'An unexpected error occurred')}
         </p>
         {error.digest && (
           <p className="mt-1 text-center text-xs text-gray-500">
-            Error ID: {error.digest}
+            Error ID: {String(error.digest)}
           </p>
         )}
         <div className="mt-6">
