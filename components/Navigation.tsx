@@ -183,7 +183,7 @@ export default function Navigation() {
             ) : status === 'authenticated' ? (
               <>
                 <span className="text-sm text-gray-700 flex items-center">
-                  <span className="hidden sm:inline">{session.user?.name || session.user?.email}</span>
+                  <span className="hidden sm:inline">{String(session.user?.name || session.user?.email || 'User')}</span>
                   {isAdmin && (
                     <span className="ml-2 px-2 py-0.5 bg-gradient-to-r from-purple-100 to-pink-100 text-purple-800 text-xs rounded-full font-medium">
                       Admin
