@@ -93,22 +93,22 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+    <div className="min-h-screen bg-gradient-to-b from-acm-gray-lightest to-white">
       {/* Hero Section with Gradient */}
       <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 opacity-10"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-acm-brand via-acm-gold to-acm-brand-dark opacity-10"></div>
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
           <div className="text-center">
             {/* Badge */}
-            <div className="inline-flex items-center px-4 py-2 bg-blue-100 text-blue-800 rounded-full text-sm font-medium mb-6">
-              <span className="w-2 h-2 bg-blue-600 rounded-full mr-2 animate-pulse"></span>
+            <div className="inline-flex items-center px-4 py-2 bg-acm-blue-lightest text-acm-brand rounded-full text-sm font-medium mb-6">
+              <span className="w-2 h-2 bg-acm-brand rounded-full mr-2 animate-pulse"></span>
               AI-Powered Research Intelligence Platform
             </div>
 
             {/* Main Heading */}
             <h1 className="text-5xl md:text-6xl font-extrabold text-gray-900 mb-6">
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-acm-brand to-acm-brand-dark">
                 ACM Research Agents
               </span>
             </h1>
@@ -128,13 +128,13 @@ export default function Home() {
                 <>
                   <Link
                     href="/query"
-                    className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-semibold text-lg hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200"
+                    className="px-8 py-4 bg-gradient-to-r from-acm-brand to-acm-brand-dark text-white rounded-lg font-semibold text-lg hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200"
                   >
                     Start New Query →
                   </Link>
                   <Link
                     href="/workflows"
-                    className="px-8 py-4 bg-white text-gray-700 rounded-lg font-semibold text-lg border-2 border-gray-200 hover:border-blue-600 hover:text-blue-600 transition-all duration-200"
+                    className="px-8 py-4 bg-white text-acm-text-default rounded-lg font-semibold text-lg border-2 border-gray-200 hover:border-acm-brand hover:text-acm-brand transition-all duration-200"
                   >
                     Explore Workflows
                   </Link>
@@ -143,13 +143,13 @@ export default function Home() {
                 <>
                   <Link
                     href="/auth/signin"
-                    className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-semibold text-lg hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200"
+                    className="px-8 py-4 bg-gradient-to-r from-acm-brand to-acm-brand-dark text-white rounded-lg font-semibold text-lg hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200"
                   >
                     Sign In to Get Started →
                   </Link>
                   <Link
                     href="/auth/register"
-                    className="px-8 py-4 bg-white text-gray-700 rounded-lg font-semibold text-lg border-2 border-gray-200 hover:border-blue-600 hover:text-blue-600 transition-all duration-200"
+                    className="px-8 py-4 bg-white text-acm-text-default rounded-lg font-semibold text-lg border-2 border-gray-200 hover:border-acm-brand hover:text-acm-brand transition-all duration-200"
                   >
                     Create Account
                   </Link>
@@ -160,7 +160,7 @@ export default function Home() {
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
               <div className="bg-white rounded-lg shadow-md p-6 border border-gray-100">
-                <div className="text-4xl font-bold text-blue-600 mb-2">
+                <div className="text-4xl font-bold text-acm-brand mb-2">
                   {loading ? '...' : String(stats.totalQueries || 0)}
                 </div>
                 <div className="text-sm text-gray-600 font-medium">Research Queries</div>
@@ -168,7 +168,7 @@ export default function Home() {
               </div>
 
               <div className="bg-white rounded-lg shadow-md p-6 border border-gray-100">
-                <div className="text-4xl font-bold text-purple-600 mb-2">
+                <div className="text-4xl font-bold text-acm-gold mb-2">
                   {loading ? '...' : `${String(stats.avgConsensusRate || 0)}%`}
                 </div>
                 <div className="text-sm text-gray-600 font-medium">Consensus Rate</div>
@@ -176,7 +176,7 @@ export default function Home() {
               </div>
 
               <div className="bg-white rounded-lg shadow-md p-6 border border-gray-100">
-                <div className="text-4xl font-bold text-indigo-600 mb-2">
+                <div className="text-4xl font-bold text-acm-brand-dark mb-2">
                   {loading ? '...' : String(stats.totalWorkflows || 0)}
                 </div>
                 <div className="text-sm text-gray-600 font-medium">Research Workflows</div>
@@ -197,10 +197,10 @@ export default function Home() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Step 1 */}
           <div className="relative">
-            <div className="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-lg p-6 shadow-lg">
+            <div className="bg-gradient-to-br from-acm-brand to-acm-brand-dark text-white rounded-lg p-6 shadow-lg">
               <div className="text-3xl font-bold mb-4">1</div>
               <h3 className="text-xl font-semibold mb-2">Ask Your Question</h3>
-              <p className="text-sm text-blue-100">
+              <p className="text-sm text-acm-blue-lightest">
                 Enter your research query or select from pre-built workflow templates
               </p>
             </div>
@@ -210,10 +210,10 @@ export default function Home() {
 
           {/* Step 2 */}
           <div className="relative">
-            <div className="bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-lg p-6 shadow-lg">
+            <div className="bg-gradient-to-br from-acm-gold to-acm-gold-light text-white rounded-lg p-6 shadow-lg">
               <div className="text-3xl font-bold mb-4">2</div>
               <h3 className="text-xl font-semibold mb-2">Parallel Analysis</h3>
-              <p className="text-sm text-purple-100">
+              <p className="text-sm text-yellow-100">
                 4 frontier LLMs analyze your query simultaneously in real-time
               </p>
             </div>
@@ -222,10 +222,10 @@ export default function Home() {
 
           {/* Step 3 */}
           <div className="relative">
-            <div className="bg-gradient-to-br from-indigo-500 to-indigo-600 text-white rounded-lg p-6 shadow-lg">
+            <div className="bg-gradient-to-br from-acm-brand-dark to-acm-brand text-white rounded-lg p-6 shadow-lg">
               <div className="text-3xl font-bold mb-4">3</div>
               <h3 className="text-xl font-semibold mb-2">Consensus Detection</h3>
-              <p className="text-sm text-indigo-100">
+              <p className="text-sm text-acm-blue-lightest">
                 AI identifies agreements, conflicts, and confidence levels automatically
               </p>
             </div>
@@ -234,10 +234,10 @@ export default function Home() {
 
           {/* Step 4 */}
           <div>
-            <div className="bg-gradient-to-br from-green-500 to-green-600 text-white rounded-lg p-6 shadow-lg">
+            <div className="bg-gradient-to-br from-acm-gold-light to-acm-gold text-white rounded-lg p-6 shadow-lg">
               <div className="text-3xl font-bold mb-4">4</div>
               <h3 className="text-xl font-semibold mb-2">Human Decision</h3>
-              <p className="text-sm text-green-100">
+              <p className="text-sm text-yellow-100">
                 Review all responses and make informed decisions with full audit trail
               </p>
             </div>
@@ -342,8 +342,8 @@ export default function Home() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {/* Feature 1 */}
-          <div className="bg-white rounded-lg p-6 border border-gray-200 hover:border-blue-500 hover:shadow-lg transition-all duration-300">
-            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center text-2xl mb-4">
+          <div className="bg-white rounded-lg p-6 border border-gray-200 hover:border-acm-brand hover:shadow-lg transition-all duration-300">
+            <div className="w-12 h-12 bg-acm-blue-lightest rounded-lg flex items-center justify-center text-2xl mb-4">
               🔄
             </div>
             <h3 className="text-xl font-semibold text-gray-900 mb-3">Parallel LLM Orchestration</h3>
@@ -353,8 +353,8 @@ export default function Home() {
           </div>
 
           {/* Feature 2 */}
-          <div className="bg-white rounded-lg p-6 border border-gray-200 hover:border-purple-500 hover:shadow-lg transition-all duration-300">
-            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center text-2xl mb-4">
+          <div className="bg-white rounded-lg p-6 border border-gray-200 hover:border-acm-gold hover:shadow-lg transition-all duration-300">
+            <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center text-2xl mb-4">
               ✅
             </div>
             <h3 className="text-xl font-semibold text-gray-900 mb-3">Automatic Consensus Detection</h3>
@@ -364,8 +364,8 @@ export default function Home() {
           </div>
 
           {/* Feature 3 */}
-          <div className="bg-white rounded-lg p-6 border border-gray-200 hover:border-green-500 hover:shadow-lg transition-all duration-300">
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center text-2xl mb-4">
+          <div className="bg-white rounded-lg p-6 border border-gray-200 hover:border-acm-brand hover:shadow-lg transition-all duration-300">
+            <div className="w-12 h-12 bg-acm-blue-lightest rounded-lg flex items-center justify-center text-2xl mb-4">
               🎯
             </div>
             <h3 className="text-xl font-semibold text-gray-900 mb-3">Domain-Optimized Workflows</h3>
@@ -375,8 +375,8 @@ export default function Home() {
           </div>
 
           {/* Feature 4 */}
-          <div className="bg-white rounded-lg p-6 border border-gray-200 hover:border-yellow-500 hover:shadow-lg transition-all duration-300">
-            <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center text-2xl mb-4">
+          <div className="bg-white rounded-lg p-6 border border-gray-200 hover:border-acm-gold hover:shadow-lg transition-all duration-300">
+            <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center text-2xl mb-4">
               👤
             </div>
             <h3 className="text-xl font-semibold text-gray-900 mb-3">Human-in-the-Loop</h3>
@@ -386,8 +386,8 @@ export default function Home() {
           </div>
 
           {/* Feature 5 */}
-          <div className="bg-white rounded-lg p-6 border border-gray-200 hover:border-indigo-500 hover:shadow-lg transition-all duration-300">
-            <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center text-2xl mb-4">
+          <div className="bg-white rounded-lg p-6 border border-gray-200 hover:border-acm-brand hover:shadow-lg transition-all duration-300">
+            <div className="w-12 h-12 bg-acm-blue-lightest rounded-lg flex items-center justify-center text-2xl mb-4">
               💾
             </div>
             <h3 className="text-xl font-semibold text-gray-900 mb-3">Smart Caching & Re-run</h3>
@@ -397,8 +397,8 @@ export default function Home() {
           </div>
 
           {/* Feature 6 */}
-          <div className="bg-white rounded-lg p-6 border border-gray-200 hover:border-red-500 hover:shadow-lg transition-all duration-300">
-            <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center text-2xl mb-4">
+          <div className="bg-white rounded-lg p-6 border border-gray-200 hover:border-acm-gold hover:shadow-lg transition-all duration-300">
+            <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center text-2xl mb-4">
               📊
             </div>
             <h3 className="text-xl font-semibold text-gray-900 mb-3">Advanced Analytics</h3>
@@ -408,8 +408,8 @@ export default function Home() {
           </div>
 
           {/* Feature 7 */}
-          <div className="bg-white rounded-lg p-6 border border-gray-200 hover:border-pink-500 hover:shadow-lg transition-all duration-300">
-            <div className="w-12 h-12 bg-pink-100 rounded-lg flex items-center justify-center text-2xl mb-4">
+          <div className="bg-white rounded-lg p-6 border border-gray-200 hover:border-acm-brand hover:shadow-lg transition-all duration-300">
+            <div className="w-12 h-12 bg-acm-blue-lightest rounded-lg flex items-center justify-center text-2xl mb-4">
               🔐
             </div>
             <h3 className="text-xl font-semibold text-gray-900 mb-3">Secure Authentication</h3>
@@ -419,8 +419,8 @@ export default function Home() {
           </div>
 
           {/* Feature 8 */}
-          <div className="bg-white rounded-lg p-6 border border-gray-200 hover:border-teal-500 hover:shadow-lg transition-all duration-300">
-            <div className="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center text-2xl mb-4">
+          <div className="bg-white rounded-lg p-6 border border-gray-200 hover:border-acm-gold hover:shadow-lg transition-all duration-300">
+            <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center text-2xl mb-4">
               🗂️
             </div>
             <h3 className="text-xl font-semibold text-gray-900 mb-3">Query Collections</h3>
@@ -430,8 +430,8 @@ export default function Home() {
           </div>
 
           {/* Feature 9 */}
-          <div className="bg-white rounded-lg p-6 border border-gray-200 hover:border-orange-500 hover:shadow-lg transition-all duration-300">
-            <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center text-2xl mb-4">
+          <div className="bg-white rounded-lg p-6 border border-gray-200 hover:border-acm-brand hover:shadow-lg transition-all duration-300">
+            <div className="w-12 h-12 bg-acm-blue-lightest rounded-lg flex items-center justify-center text-2xl mb-4">
               ⚡
             </div>
             <h3 className="text-xl font-semibold text-gray-900 mb-3">Real-Time Processing</h3>
@@ -441,15 +441,15 @@ export default function Home() {
           </div>
 
           {/* Feature 10 - Competitor Intelligence */}
-          <Link href="/competitors" className="bg-white rounded-lg p-6 border border-gray-200 hover:border-purple-500 hover:shadow-lg transition-all duration-300 block">
-            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center text-2xl mb-4">
+          <Link href="/competitors" className="bg-white rounded-lg p-6 border border-gray-200 hover:border-acm-gold hover:shadow-lg transition-all duration-300 block">
+            <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center text-2xl mb-4">
               🎯
             </div>
             <h3 className="text-xl font-semibold text-gray-900 mb-3">Competitor Intelligence</h3>
             <p className="text-gray-600">
               Interactive world map of competitors. AI-powered weekly research and automated competitive intelligence newsletters.
             </p>
-            <div className="mt-4 text-purple-600 font-semibold flex items-center gap-2">
+            <div className="mt-4 text-acm-gold font-semibold flex items-center gap-2">
               View Competitors →
             </div>
           </Link>
@@ -467,7 +467,7 @@ export default function Home() {
               </div>
               <Link
                 href={session ? '/workflows' : '/auth/signin'}
-                className="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+                className="px-6 py-3 bg-acm-brand text-white rounded-lg font-semibold hover:bg-acm-brand-dark transition-colors"
               >
                 {session ? 'View All Workflows →' : 'Sign In to View Workflows →'}
               </Link>
@@ -477,11 +477,11 @@ export default function Home() {
               {workflows.slice(0, 6).map((workflow) => (
                 <div
                   key={workflow.id}
-                  className="bg-white rounded-lg p-6 border border-gray-200 hover:border-blue-500 hover:shadow-lg transition-all duration-300"
+                  className="bg-white rounded-lg p-6 border border-gray-200 hover:border-acm-brand hover:shadow-lg transition-all duration-300"
                 >
                   <div className="flex items-start justify-between mb-4">
                     <div className="text-3xl">{String(workflow.icon || '🔬')}</div>
-                    <span className="text-xs font-medium px-3 py-1 bg-blue-100 text-blue-800 rounded-full">
+                    <span className="text-xs font-medium px-3 py-1 bg-acm-blue-lightest text-acm-brand rounded-full">
                       {String(workflow.domain || 'General')}
                     </span>
                   </div>
@@ -495,7 +495,7 @@ export default function Home() {
                     </span>
                     <Link
                       href={session ? `/query?workflow=${workflow.id}` : '/auth/signin'}
-                      className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center"
+                      className="text-sm text-acm-brand hover:text-acm-brand-dark font-medium flex items-center"
                     >
                       Use Workflow
                       <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -519,7 +519,7 @@ export default function Home() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Use Case 1 */}
-          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-8 border border-blue-200">
+          <div className="bg-gradient-to-br from-acm-gray-lightest to-acm-blue-lightest rounded-lg p-8 border border-acm-blue-light">
             <div className="text-4xl mb-4">🔬</div>
             <h3 className="text-xl font-semibold text-gray-900 mb-3">Preclinical Research</h3>
             <p className="text-gray-700 mb-4">
@@ -527,22 +527,22 @@ export default function Home() {
             </p>
             <ul className="space-y-2 text-sm text-gray-600">
               <li className="flex items-start">
-                <span className="text-blue-600 mr-2">•</span>
+                <span className="text-acm-brand mr-2">•</span>
                 Compare drug-target interactions across models
               </li>
               <li className="flex items-start">
-                <span className="text-blue-600 mr-2">•</span>
+                <span className="text-acm-brand mr-2">•</span>
                 Identify potential safety concerns early
               </li>
               <li className="flex items-start">
-                <span className="text-blue-600 mr-2">•</span>
+                <span className="text-acm-brand mr-2">•</span>
                 Validate mechanistic hypotheses
               </li>
             </ul>
           </div>
 
           {/* Use Case 2 */}
-          <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg p-8 border border-purple-200">
+          <div className="bg-gradient-to-br from-amber-50 to-yellow-50 rounded-lg p-8 border border-amber-200">
             <div className="text-4xl mb-4">⚕️</div>
             <h3 className="text-xl font-semibold text-gray-900 mb-3">Clinical Development</h3>
             <p className="text-gray-700 mb-4">
@@ -550,22 +550,22 @@ export default function Home() {
             </p>
             <ul className="space-y-2 text-sm text-gray-600">
               <li className="flex items-start">
-                <span className="text-purple-600 mr-2">•</span>
+                <span className="text-acm-gold mr-2">•</span>
                 Design optimal trial protocols
               </li>
               <li className="flex items-start">
-                <span className="text-purple-600 mr-2">•</span>
+                <span className="text-acm-gold mr-2">•</span>
                 Identify biomarker strategies
               </li>
               <li className="flex items-start">
-                <span className="text-purple-600 mr-2">•</span>
+                <span className="text-acm-gold mr-2">•</span>
                 Assess competitive positioning
               </li>
             </ul>
           </div>
 
           {/* Use Case 3 */}
-          <div className="bg-gradient-to-br from-green-50 to-teal-50 rounded-lg p-8 border border-green-200">
+          <div className="bg-gradient-to-br from-acm-gray-lightest to-acm-blue-lightest rounded-lg p-8 border border-acm-blue-light">
             <div className="text-4xl mb-4">📚</div>
             <h3 className="text-xl font-semibold text-gray-900 mb-3">Literature Analysis</h3>
             <p className="text-gray-700 mb-4">
@@ -573,22 +573,22 @@ export default function Home() {
             </p>
             <ul className="space-y-2 text-sm text-gray-600">
               <li className="flex items-start">
-                <span className="text-green-600 mr-2">•</span>
+                <span className="text-acm-brand mr-2">•</span>
                 Synthesize insights from multiple papers
               </li>
               <li className="flex items-start">
-                <span className="text-green-600 mr-2">•</span>
+                <span className="text-acm-brand mr-2">•</span>
                 Detect conflicting evidence
               </li>
               <li className="flex items-start">
-                <span className="text-green-600 mr-2">•</span>
+                <span className="text-acm-brand mr-2">•</span>
                 Track emerging research trends
               </li>
             </ul>
           </div>
 
           {/* Use Case 4 */}
-          <div className="bg-gradient-to-br from-orange-50 to-red-50 rounded-lg p-8 border border-orange-200">
+          <div className="bg-gradient-to-br from-amber-50 to-yellow-50 rounded-lg p-8 border border-amber-200">
             <div className="text-4xl mb-4">💡</div>
             <h3 className="text-xl font-semibold text-gray-900 mb-3">Regulatory Strategy</h3>
             <p className="text-gray-700 mb-4">
@@ -596,15 +596,15 @@ export default function Home() {
             </p>
             <ul className="space-y-2 text-sm text-gray-600">
               <li className="flex items-start">
-                <span className="text-orange-600 mr-2">•</span>
+                <span className="text-acm-gold mr-2">•</span>
                 Evaluate regulatory pathways
               </li>
               <li className="flex items-start">
-                <span className="text-orange-600 mr-2">•</span>
+                <span className="text-acm-gold mr-2">•</span>
                 Assess submission readiness
               </li>
               <li className="flex items-start">
-                <span className="text-orange-600 mr-2">•</span>
+                <span className="text-acm-gold mr-2">•</span>
                 Plan risk mitigation strategies
               </li>
             </ul>
@@ -613,10 +613,10 @@ export default function Home() {
       </div>
 
       {/* Final CTA Section */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-16">
+      <div className="bg-gradient-to-r from-acm-brand to-acm-brand-dark text-white py-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-4xl font-bold mb-4">Ready to Transform Your Research?</h2>
-          <p className="text-xl text-blue-100 mb-8">
+          <p className="text-xl text-acm-blue-lightest mb-8">
             Join the next generation of AI-powered cancer research. Query multiple frontier models.
             Get consensus-driven insights. Make confident decisions.
           </p>
@@ -626,13 +626,13 @@ export default function Home() {
               <>
                 <Link
                   href="/query"
-                  className="px-8 py-4 bg-white text-blue-600 rounded-lg font-semibold text-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
+                  className="px-8 py-4 bg-white text-acm-brand rounded-lg font-semibold text-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
                 >
                   Start Your First Query
                 </Link>
                 <Link
                   href="/history"
-                  className="px-8 py-4 bg-blue-700 text-white rounded-lg font-semibold text-lg border-2 border-blue-400 hover:bg-blue-800 transition-all duration-200"
+                  className="px-8 py-4 bg-acm-brand-dark text-white rounded-lg font-semibold text-lg border-2 border-acm-blue-light hover:bg-acm-brand transition-all duration-200"
                 >
                   View Query History
                 </Link>
@@ -641,13 +641,13 @@ export default function Home() {
               <>
                 <Link
                   href="/auth/signin"
-                  className="px-8 py-4 bg-white text-blue-600 rounded-lg font-semibold text-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
+                  className="px-8 py-4 bg-white text-acm-brand rounded-lg font-semibold text-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
                 >
                   Sign In Now
                 </Link>
                 <Link
                   href="/auth/register"
-                  className="px-8 py-4 bg-blue-700 text-white rounded-lg font-semibold text-lg border-2 border-blue-400 hover:bg-blue-800 transition-all duration-200"
+                  className="px-8 py-4 bg-acm-brand-dark text-white rounded-lg font-semibold text-lg border-2 border-acm-blue-light hover:bg-acm-brand transition-all duration-200"
                 >
                   Create Free Account
                 </Link>
@@ -656,7 +656,7 @@ export default function Home() {
           </div>
 
           {session && session.user && (
-            <p className="mt-6 text-blue-200 text-sm">
+            <p className="mt-6 text-acm-blue-lightest text-sm">
               Welcome back, {String(session.user?.name || session.user?.email || 'User')}!
             </p>
           )}

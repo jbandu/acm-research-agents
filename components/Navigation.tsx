@@ -38,7 +38,7 @@ export default function Navigation() {
         <div className="flex justify-between h-16">
           <div className="flex">
             <Link href="/" className="flex items-center">
-              <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              <span className="text-xl font-bold bg-gradient-to-r from-acm-brand to-acm-brand-dark bg-clip-text text-transparent">
                 ACM Research Agents
               </span>
             </Link>
@@ -50,8 +50,8 @@ export default function Navigation() {
                   href="/query"
                   className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                     pathname === '/query'
-                      ? 'text-blue-600 bg-blue-50'
-                      : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                      ? 'text-acm-brand bg-acm-blue-lightest'
+                      : 'text-acm-text-default hover:text-acm-brand hover:bg-acm-gray-lightest'
                   }`}
                 >
                   🔬 New Query
@@ -61,8 +61,8 @@ export default function Navigation() {
                   href="/workflows"
                   className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                     pathname === '/workflows'
-                      ? 'text-blue-600 bg-blue-50'
-                      : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                      ? 'text-acm-brand bg-acm-blue-lightest'
+                      : 'text-acm-text-default hover:text-acm-brand hover:bg-acm-gray-lightest'
                   }`}
                 >
                   📋 Workflows
@@ -72,8 +72,8 @@ export default function Navigation() {
                   href="/history"
                   className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                     pathname === '/history'
-                      ? 'text-blue-600 bg-blue-50'
-                      : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                      ? 'text-acm-brand bg-acm-blue-lightest'
+                      : 'text-acm-text-default hover:text-acm-brand hover:bg-acm-gray-lightest'
                   }`}
                 >
                   📊 History
@@ -83,8 +83,8 @@ export default function Navigation() {
                   href="/ontology"
                   className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                     pathname === '/ontology'
-                      ? 'text-blue-600 bg-blue-50'
-                      : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                      ? 'text-acm-brand bg-acm-blue-lightest'
+                      : 'text-acm-text-default hover:text-acm-brand hover:bg-acm-gray-lightest'
                   }`}
                 >
                   🕸️ Knowledge Graph
@@ -94,8 +94,8 @@ export default function Navigation() {
                   href="/competitors"
                   className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                     pathname === '/competitors'
-                      ? 'text-blue-600 bg-blue-50'
-                      : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                      ? 'text-acm-brand bg-acm-blue-lightest'
+                      : 'text-acm-text-default hover:text-acm-brand hover:bg-acm-gray-lightest'
                   }`}
                 >
                   🗺️ Competitor Map
@@ -108,8 +108,8 @@ export default function Navigation() {
                       onClick={() => setIsAdminOpen(!isAdminOpen)}
                       className={`px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center ${
                         pathname?.startsWith('/admin')
-                          ? 'text-purple-600 bg-purple-50'
-                          : 'text-gray-700 hover:text-purple-600 hover:bg-gray-50'
+                          ? 'text-acm-gold bg-amber-50'
+                          : 'text-acm-text-default hover:text-acm-gold hover:bg-acm-gray-lightest'
                       }`}
                     >
                       ⚙️ Admin
@@ -123,7 +123,7 @@ export default function Navigation() {
                         <div className="py-1">
                           <Link
                             href="/admin/migrate"
-                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-600"
+                            className="block px-4 py-2 text-sm text-acm-text-default hover:bg-amber-50 hover:text-acm-gold"
                             onClick={() => setIsAdminOpen(false)}
                           >
                             <span className="flex items-center">
@@ -133,7 +133,7 @@ export default function Navigation() {
                           </Link>
                           <Link
                             href="/admin/intelligence"
-                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-600"
+                            className="block px-4 py-2 text-sm text-acm-text-default hover:bg-amber-50 hover:text-acm-gold"
                             onClick={() => setIsAdminOpen(false)}
                           >
                             <span className="flex items-center">
@@ -155,17 +155,17 @@ export default function Navigation() {
               <div className="text-sm text-gray-500">Loading...</div>
             ) : status === 'authenticated' ? (
               <>
-                <span className="text-sm text-gray-700 flex items-center">
+                <span className="text-sm text-acm-text-default flex items-center">
                   <span className="hidden sm:inline">{String(session.user?.name || session.user?.email || 'User')}</span>
                   {isAdmin && (
-                    <span className="ml-2 px-2 py-0.5 bg-gradient-to-r from-purple-100 to-pink-100 text-purple-800 text-xs rounded-full font-medium">
+                    <span className="ml-2 px-2 py-0.5 bg-gradient-to-r from-amber-100 to-yellow-100 text-acm-gold text-xs rounded-full font-medium">
                       Admin
                     </span>
                   )}
                 </span>
                 <button
                   onClick={() => signOut({ callbackUrl: '/auth/signin' })}
-                  className="text-sm text-gray-700 hover:text-red-600 px-3 py-2 rounded-md font-medium transition-colors"
+                  className="text-sm text-acm-text-default hover:text-red-600 px-3 py-2 rounded-md font-medium transition-colors"
                 >
                   Sign Out
                 </button>
@@ -173,7 +173,7 @@ export default function Navigation() {
             ) : (
               <Link
                 href="/auth/signin"
-                className="text-sm font-medium px-4 py-2 rounded-md bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 transition-all"
+                className="text-sm font-medium px-4 py-2 rounded-md bg-gradient-to-r from-acm-brand to-acm-brand-dark text-white hover:from-acm-brand-dark hover:to-acm-brand transition-all shadow-sm"
               >
                 Sign In
               </Link>
