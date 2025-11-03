@@ -49,11 +49,11 @@ This comprehensive guide documents the **ACM Research Agents Platform** - an ent
 
 ## Overview
 
-**ACM Research Agents** is a pioneering multi-LLM orchestration platform that accelerates cancer research by simultaneously querying up to five frontier AI models (Claude Sonnet 4.5, GPT-4o, Gemini 2.0 Flash, Grok 2, and optional local Ollama), with admin-configurable provider selection, detecting consensus, flagging conflicts, and requiring human approval for all decisions—creating an AI-augmented, not AI-replaced, research workflow.
+**ACM Research Agents** is a pioneering multi-LLM orchestration platform that accelerates cancer research by simultaneously querying four leading AI models (Claude Sonnet 4.5, GPT-4o, Gemini 2.0 Flash, and Grok 2), detecting consensus, flagging conflicts, and requiring human approval for all decisions—creating an AI-augmented, not AI-replaced, research workflow.
 
 ## Key Statistics
 
-- **Up to 5 Configurable AI Models** (Claude, GPT-4o, Gemini, Grok, Ollama) for every research question
+- **4 AI Models** queried simultaneously for every research question
 - **90% Cost Reduction** through intelligent prompt caching
 - **60-80% Monthly Savings** via query deduplication and optimization
 - **23 Automated Tests** ensuring production reliability
@@ -155,7 +155,7 @@ This comprehensive guide documents the **ACM Research Agents Platform** - an ent
    - AI provides perspective, humans provide judgment
 
 2. **Consensus Over Single Opinion**
-   - Multiple AI models provide independent perspectives
+   - 4 models provide 4 independent perspectives
    - Automatic consensus detection
    - Conflicts flagged for expert review
 
@@ -286,7 +286,7 @@ This comprehensive guide documents the **ACM Research Agents Platform** - an ent
 ## 1. Multi-LLM Orchestration
 
 ### What It Does
-Simultaneously queries multiple frontier AI models with the same research question, capturing independent perspectives and enabling cross-validation.
+Simultaneously queries four frontier AI models with the same research question, capturing independent perspectives and enabling cross-validation.
 
 ### The Four Models
 
@@ -730,7 +730,7 @@ Automatic patent search on every query using Google Patents API, providing IP la
 
 **Integration with LLMs:**
 - Patent results provided as context
-- All enabled models receive patent information
+- All 4 models receive patent information
 - IP-aware response generation
 - Competitive patent analysis included
 
@@ -1125,74 +1125,6 @@ Effective Cost/Query   $0.37         $0.68         46%
 
 ---
 
-## 11. Dynamic Provider Configuration
-
-### What It Does
-Admin-configurable LLM provider and search source management, allowing dynamic enable/disable of AI models and research databases without code changes.
-
-### Provider Management
-
-**LLM Providers (up to 5):**
-- Claude Sonnet 4.5 (Anthropic)
-- GPT-4o (OpenAI)
-- Gemini 2.0 Flash (Google)
-- Grok 2 (xAI)
-- Ollama (Local LLM - optional)
-
-**Search Sources:**
-- Google Patents (SerpAPI)
-- More sources can be added via database
-
-### Admin Interface
-
-**Location:** `/admin/settings`
-
-**Features:**
-- Toggle switches for each provider
-- Real-time enable/disable
-- No code deployment required
-- Changes take effect immediately
-- Display order configuration
-- Cost information per provider
-
-### How It Works
-
-**Database-Driven:**
-```sql
-provider_settings table:
-├─ provider_key (claude, openai, gemini, grok, ollama, google_patents)
-├─ provider_type (llm or search)
-├─ enabled (boolean)
-├─ display_order (integer)
-├─ config (JSONB - model name, costs, etc.)
-```
-
-**Query Execution:**
-1. System fetches enabled providers from database
-2. Only queries enabled LLM models
-3. Only runs enabled search sources
-4. Gracefully handles provider failures
-
-### Business Value
-
-**Flexibility:**
-- Disable expensive models during budget constraints
-- Enable/disable Ollama for cost-free local queries
-- Turn off patent search if not needed
-- A/B test different model combinations
-
-**Cost Control:**
-- Instant cost reduction by disabling providers
-- Test with fewer models before scaling
-- Optimize provider mix based on performance
-
-**Future-Proof:**
-- Add new AI models via database insert
-- No code changes required
-- Seamless integration of new providers
-
----
-
 [Continue to next section...]
 
 
@@ -1436,7 +1368,7 @@ Research team needs to understand latest CAR-T therapy advances for melanoma bef
 1. Select "Literature Mining & Synthesis" workflow
 2. Enter query: "Latest advances in CAR-T therapy for melanoma, focus on target antigens and clinical outcomes"
 3. Choose Standard context
-4. Execute query (15-30 minutes depending on enabled models)
+4. Execute query (15 minutes for 4 models)
 5. Review consensus summary
 6. Approve final synthesis
 **Total Time:** 30 minutes
@@ -1509,7 +1441,7 @@ Design Phase 2 trial for novel immunotherapy combination in NSCLC.
 - 93% time savings
 - Evidence-based endpoints
 - Competitive differentiation considered
-- Multi-expert perspective (via multiple AI models)
+- Multi-expert perspective (via 4 models)
 
 ---
 
@@ -2108,7 +2040,7 @@ npm run seed:test  # Creates test users
 ## Performance Specifications
 
 **Query Execution:**
-- Average time: 15-30 seconds (all enabled models in parallel)
+- Average time: 15-30 seconds (4 models in parallel)
 - Cache hit: < 50 milliseconds
 - Timeout: 2 minutes (configurable)
 
@@ -2309,11 +2241,11 @@ npm run seed:test  # Creates test users
 
 ## Platform Summary
 
-The **ACM Research Agents Platform** represents a paradigm shift in biotech research intelligence—combining the analytical power of multiple frontier AI models with domain-specific optimization, comprehensive governance, and cost-conscious design.
+The **ACM Research Agents Platform** represents a paradigm shift in biotech research intelligence—combining the analytical power of four frontier AI models with domain-specific optimization, comprehensive governance, and cost-conscious design.
 
 ### Key Differentiators
 
-1. **Multi-Perspective AI** - Multiple models provide independent analysis, eliminating single-source bias
+1. **Multi-Perspective AI** - 4 models provide independent analysis, eliminating single-source bias
 2. **Consensus Validation** - Automatic detection of agreement and conflict
 3. **Human Governance** - Required approval prevents unchecked AI decision-making
 4. **Cost Intelligence** - 60-80% savings through smart caching and optimization

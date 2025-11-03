@@ -220,19 +220,63 @@ export async function queryGrok(input: QueryInput): Promise<LLMResponse> {
 
 // Query all LLMs in parallel (including local Ollama if available)
 export async function queryAllLLMs(input: QueryInput): Promise<LLMResponse[]> {
-  const queries = [
-    queryClaude(input),
-    queryOpenAI(input),
-    queryGemini(input),
-    queryGrok(input),
-  ];
+  // Fetch enabled LLM providers from database
+  let enabledProviders: string[] = [];
 
-  // Add Ollama if it's available
-  const ollamaEnabled = process.env.ENABLE_OLLAMA !== 'false'; // Default to enabled
-  if (ollamaEnabled) {
-    queries.push(
-      queryOllama(input.queryText, input.systemPrompt) as Promise<LLMResponse>
-    );
+  try {
+    const { Client } = await import('pg');
+    const client = new Client({ connectionString: process.env.DATABASE_URL });
+    await client.connect();
+
+    const result = await client.query(`
+      SELECT provider_key
+      FROM provider_settings
+      WHERE provider_type = 'llm' AND enabled = true
+      ORDER BY display_order
+    `);
+
+    enabledProviders = result.rows.map(row => row.provider_key);
+    await client.end();
+
+    console.log('Enabled LLM providers from database:', enabledProviders);
+  } catch (error: any) {
+    // Fallback to default providers if database query fails
+    console.warn('Could not fetch provider settings from database, using defaults:', error.message);
+    enabledProviders = ['claude', 'openai', 'gemini', 'grok'];
+
+    // Check env var for Ollama
+    const ollamaEnabled = process.env.ENABLE_OLLAMA !== 'false';
+    if (ollamaEnabled) {
+      enabledProviders.push('ollama');
+    }
+  }
+
+  // Build queries array based on enabled providers
+  const queries: Promise<LLMResponse>[] = [];
+
+  if (enabledProviders.includes('claude')) {
+    queries.push(queryClaude(input));
+  }
+
+  if (enabledProviders.includes('openai')) {
+    queries.push(queryOpenAI(input));
+  }
+
+  if (enabledProviders.includes('gemini')) {
+    queries.push(queryGemini(input));
+  }
+
+  if (enabledProviders.includes('grok')) {
+    queries.push(queryGrok(input));
+  }
+
+  if (enabledProviders.includes('ollama')) {
+    queries.push(queryOllama(input.queryText, input.systemPrompt) as Promise<LLMResponse>);
+  }
+
+  if (queries.length === 0) {
+    console.warn('No LLM providers enabled! Using Claude as fallback.');
+    queries.push(queryClaude(input));
   }
 
   const results = await Promise.all(queries);
