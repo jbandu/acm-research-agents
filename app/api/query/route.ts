@@ -73,10 +73,29 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Search Google Patents FIRST (before LLMs)
-    console.log('Searching Google Patents...');
-    const patentResults: PatentResult[] = await searchGooglePatents(query_text, 10);
-    console.log(`Found ${patentResults.length} patents`);
+    // Check if Google Patents search is enabled
+    let patentResults: PatentResult[] = [];
+    try {
+      const settingsCheck = await query(`
+        SELECT enabled
+        FROM provider_settings
+        WHERE provider_key = 'google_patents' AND provider_type = 'search'
+      `);
+
+      const patentsEnabled = settingsCheck.rows.length > 0 ? settingsCheck.rows[0].enabled : true;
+
+      if (patentsEnabled) {
+        console.log('Searching Google Patents...');
+        patentResults = await searchGooglePatents(query_text, 10);
+        console.log(`Found ${patentResults.length} patents`);
+      } else {
+        console.log('Google Patents search disabled in settings');
+      }
+    } catch (error: any) {
+      // If table doesn't exist yet, default to enabled
+      console.log('Provider settings not available, defaulting Google Patents to enabled');
+      patentResults = await searchGooglePatents(query_text, 10);
+    }
 
     // Save patent search to database (gracefully handle missing tables)
     let patentSearchId: string | null = null;
