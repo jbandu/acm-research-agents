@@ -8,9 +8,7 @@ import { useState, useRef, useEffect } from 'react';
 export default function Navigation() {
   const { data: session, status } = useSession();
   const pathname = usePathname();
-  const [isIntelligenceOpen, setIsIntelligenceOpen] = useState(false);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
-  const intelligenceRef = useRef<HTMLDivElement>(null);
   const adminRef = useRef<HTMLDivElement>(null);
 
   // Close dropdowns when clicking outside
@@ -18,9 +16,6 @@ export default function Navigation() {
     if (typeof window === 'undefined') return;
 
     function handleClickOutside(event: MouseEvent) {
-      if (intelligenceRef.current && !intelligenceRef.current.contains(event.target as Node)) {
-        setIsIntelligenceOpen(false);
-      }
       if (adminRef.current && !adminRef.current.contains(event.target as Node)) {
         setIsAdminOpen(false);
       }
@@ -84,49 +79,27 @@ export default function Navigation() {
                   📊 History
                 </Link>
 
-                {/* Intelligence Dropdown */}
-                <div className="relative" ref={intelligenceRef}>
-                  <button
-                    onClick={() => setIsIntelligenceOpen(!isIntelligenceOpen)}
-                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center ${
-                      pathname?.startsWith('/ontology') || pathname?.startsWith('/competitors')
-                        ? 'text-blue-600 bg-blue-50'
-                        : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
-                    }`}
-                  >
-                    🧠 Intelligence
-                    <svg className={`ml-1 h-4 w-4 transition-transform ${isIntelligenceOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </button>
+                <Link
+                  href="/ontology"
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    pathname === '/ontology'
+                      ? 'text-blue-600 bg-blue-50'
+                      : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                  }`}
+                >
+                  🕸️ Knowledge Graph
+                </Link>
 
-                  {isIntelligenceOpen && (
-                    <div className="absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
-                      <div className="py-1">
-                        <Link
-                          href="/ontology"
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600"
-                          onClick={() => setIsIntelligenceOpen(false)}
-                        >
-                          <span className="flex items-center">
-                            <span className="mr-2">🕸️</span>
-                            Knowledge Graph
-                          </span>
-                        </Link>
-                        <Link
-                          href="/competitors"
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600"
-                          onClick={() => setIsIntelligenceOpen(false)}
-                        >
-                          <span className="flex items-center">
-                            <span className="mr-2">🗺️</span>
-                            Competitor Map
-                          </span>
-                        </Link>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                <Link
+                  href="/competitors"
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    pathname === '/competitors'
+                      ? 'text-blue-600 bg-blue-50'
+                      : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                  }`}
+                >
+                  🗺️ Competitor Map
+                </Link>
 
                 {/* Admin Dropdown (only for admins) */}
                 {isAdmin && (
