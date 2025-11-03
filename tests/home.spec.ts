@@ -76,7 +76,6 @@ test.describe('Home Page', () => {
     await expect(page.locator('text=Sign Out')).toBeVisible();
 
     // Check user info is displayed (use environment email)
-    const testEmail = process.env.TEST_USER_EMAIL || 'test@acm.com';
     const emailPart = testEmail.split('@')[0]; // Get first part of email
     await expect(
       page.locator(`text=${testEmail}`).or(page.locator(`text=${emailPart}`)).or(page.locator('text=Sign Out'))
