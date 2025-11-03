@@ -6,6 +6,7 @@ import { ContextLevelSelector } from '@/components/ContextLevelSelector';
 import { DataSourceSelector } from '@/components/DataSourceSelector';
 import { CostEstimator } from '@/components/CostEstimator';
 import PatentCard from '@/components/PatentCard';
+import FollowUpQuestions from '@/components/FollowUpQuestions';
 
 interface LLMResponse {
   provider: 'claude' | 'openai' | 'gemini' | 'grok';
@@ -45,6 +46,9 @@ function QueryPageContent() {
   // Summary state
   const [summary, setSummary] = useState<string>('');
   const [summaryLoading, setSummaryLoading] = useState(false);
+
+  // Follow-up questions state
+  const [followupQuestions, setFollowupQuestions] = useState<any[]>([]);
 
   // Patent state
   const [patents, setPatents] = useState<any[]>([]);
@@ -105,7 +109,7 @@ function QueryPageContent() {
 
       // Generate summary after responses are received
       if (data.responses && data.responses.length > 0) {
-        generateSummary(data.responses, queryText);
+        generateSummary(data.responses, queryText, data.query_id);
       }
     } catch (error: any) {
       console.error('Query error:', error);
@@ -115,9 +119,10 @@ function QueryPageContent() {
     }
   };
 
-  const generateSummary = async (llmResponses: LLMResponse[], query: string) => {
+  const generateSummary = async (llmResponses: LLMResponse[], query: string, query_id?: string) => {
     setSummaryLoading(true);
     setSummary('');
+    setFollowupQuestions([]);
 
     try {
       const response = await fetch('/api/query/summarize', {
@@ -126,6 +131,7 @@ function QueryPageContent() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          query_id,
           query_text: query,
           responses: llmResponses.filter(r => !r.error).map(r => ({
             provider: r.provider,
@@ -140,6 +146,10 @@ function QueryPageContent() {
 
       if (data.summary) {
         setSummary(data.summary);
+      }
+
+      if (data.followup_questions) {
+        setFollowupQuestions(data.followup_questions);
       }
     } catch (error: any) {
       console.error('Summary generation error:', error);
@@ -619,6 +629,19 @@ function QueryPageContent() {
               This summary synthesizes key insights and consensus points from Claude, GPT-4, Gemini, and Grok responses using Claude API.
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Follow-Up Questions Section */}
+      {!loading && followupQuestions.length > 0 && (
+        <div className="mb-8">
+          <FollowUpQuestions
+            questions={followupQuestions}
+            originalQueryId={queryId}
+            onQuestionClick={(question) => {
+              setQueryText(question.question);
+            }}
+          />
         </div>
       )}
 
