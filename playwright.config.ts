@@ -23,6 +23,9 @@ export default defineConfig({
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
+    /* Increase timeouts for production (slower than localhost) */
+    navigationTimeout: process.env.CI ? 30000 : 30000, // 30 seconds
+    actionTimeout: process.env.CI ? 15000 : 10000, // 15 seconds for actions in CI
   },
 
   /* Configure projects for major browsers */
