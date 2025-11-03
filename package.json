@@ -11,7 +11,7 @@
     "test:ui": "playwright test --ui",
     "test:headed": "playwright test --headed",
     "test:debug": "playwright test --debug",
-    "seed:test": "node scripts/seed-test-data.js"
+    "seed:test": "node scripts/seed-test-data.js",
     "test:serpapi": "node scripts/test-serpapi.js"
   },
   "keywords": [

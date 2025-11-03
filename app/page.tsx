@@ -49,6 +49,13 @@ export default function Home() {
         }),
       ]);
 
+      // Check if responses are OK before parsing JSON
+      if (!workflowsRes.ok || !statsRes.ok) {
+        console.error('Failed to fetch data');
+        setLoading(false);
+        return;
+      }
+
       const workflowsData = await workflowsRes.json().catch((err) => {
         console.error('Failed to parse workflows JSON:', err);
         return { workflows: [] };
@@ -60,15 +67,6 @@ export default function Home() {
 
       console.log('Workflows data:', JSON.stringify(workflowsData, null, 2));
       console.log('History data:', JSON.stringify(historyData, null, 2));
-      // Check if responses are OK before parsing JSON
-      if (!workflowsRes.ok || !statsRes.ok) {
-        console.error('Failed to fetch data');
-        setLoading(false);
-        return;
-      }
-
-      const workflowsData = await workflowsRes.json();
-      const historyData = await statsRes.json();
 
       const workflowsList = Array.isArray(workflowsData.workflows) ? workflowsData.workflows : [];
       setWorkflows(workflowsList);
