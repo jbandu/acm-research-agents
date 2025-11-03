@@ -445,18 +445,18 @@ function QueryPageContent() {
 
       {/* Loading State */}
       {loading && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div className="response-grid mb-8">
           {['claude', 'openai', 'gemini', 'grok'].map((provider) => (
             <div key={provider} className={getLLMCardClass(provider)}>
               <div className="flex items-center mb-4">
                 <div className={`w-3 h-3 rounded-full ${getLLMBgColor(provider)} mr-3 animate-pulse`}></div>
-                <h3 className={`text-lg font-semibold ${getLLMColor(provider)} capitalize`}>
+                <h3 className={`text-lg font-bold ${getLLMColor(provider)} capitalize`}>
                   {provider} - Processing...
                 </h3>
               </div>
-              <div className="animate-pulse">
-                <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                <div className="h-4 bg-gray-200 rounded mb-2"></div>
+              <div className="animate-pulse space-y-3">
+                <div className="h-4 bg-gray-200 rounded"></div>
+                <div className="h-4 bg-gray-200 rounded"></div>
                 <div className="h-4 bg-gray-200 rounded w-3/4"></div>
               </div>
             </div>
@@ -466,25 +466,28 @@ function QueryPageContent() {
 
       {/* LLM Responses Grid */}
       {!loading && responses.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div className="response-grid mb-8">
           {responses.map((response, index) => (
             <div key={index} className={getLLMCardClass(response.provider)}>
               {/* Header */}
               <div className="flex items-center justify-between mb-4">
-                <h3 className={`text-lg font-semibold ${getLLMColor(response.provider)} capitalize`}>
-                  {response.provider}
-                </h3>
-                <span className="text-xs text-gray-500">{response.model}</span>
+                <div className="flex items-center gap-2">
+                  <div className={`w-2 h-2 rounded-full ${getLLMBgColor(response.provider)}`}></div>
+                  <h3 className={`text-lg font-bold ${getLLMColor(response.provider)} capitalize`}>
+                    {response.provider}
+                  </h3>
+                </div>
+                <span className="text-xs text-gray-500 font-mono">{response.model}</span>
               </div>
 
               {/* Response Text */}
               {response.error ? (
-                <div className="text-red-600 text-sm mb-4">
+                <div className="badge badge-error text-sm mb-4">
                   Error: {response.error}
                 </div>
               ) : (
-                <div className="prose prose-sm max-w-none mb-4">
-                  <p className="whitespace-pre-wrap text-gray-700">
+                <div className="prose prose-sm max-w-none mb-5">
+                  <p className="whitespace-pre-wrap text-gray-800 leading-relaxed">
                     {response.responseText}
                   </p>
                 </div>
@@ -492,38 +495,38 @@ function QueryPageContent() {
 
               {/* Metadata */}
               {!response.error && (
-                <div className="border-t border-gray-200 pt-4 space-y-2">
+                <div className="border-t border-gray-200 pt-4 space-y-3">
                   {response.confidenceScore !== undefined && (
                     <div>
-                      <div className="flex justify-between text-sm mb-1">
-                        <span className="text-gray-600">Confidence</span>
-                        <span className="font-medium">{response.confidenceScore}%</span>
+                      <div className="flex justify-between text-sm mb-2">
+                        <span className="text-gray-600 font-medium">Confidence Score</span>
+                        <span className="font-bold text-gray-900">{response.confidenceScore}%</span>
                       </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="confidence-bar">
                         <div
-                          className={`${getLLMBgColor(response.provider)} h-2 rounded-full`}
+                          className={`confidence-fill ${getLLMBgColor(response.provider)}`}
                           style={{ width: `${response.confidenceScore}%` }}
                         ></div>
                       </div>
                     </div>
                   )}
 
-                  <div className="flex justify-between text-sm text-gray-600">
-                    <span>Response Time</span>
-                    <span>{(response.responseTimeMs / 1000).toFixed(2)}s</span>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Response Time</span>
+                    <span className="font-semibold text-gray-900">{(response.responseTimeMs / 1000).toFixed(2)}s</span>
                   </div>
 
                   {response.tokensUsed && (
-                    <div className="flex justify-between text-sm text-gray-600">
-                      <span>Tokens</span>
-                      <span>{response.tokensUsed.toLocaleString()}</span>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Tokens Used</span>
+                      <span className="font-semibold text-gray-900">{response.tokensUsed.toLocaleString()}</span>
                     </div>
                   )}
 
                   {response.sources && response.sources.length > 0 && (
                     <div className="text-sm">
-                      <span className="text-gray-600">Sources: </span>
-                      <span className="text-blue-600">
+                      <span className="text-gray-600 font-medium">Sources: </span>
+                      <span className="text-acm-brand font-medium">
                         {response.sources.join(', ')}
                       </span>
                     </div>
@@ -538,9 +541,9 @@ function QueryPageContent() {
                     navigator.clipboard.writeText(response.responseText);
                     alert('Response copied to clipboard!');
                   }}
-                  className="mt-4 w-full px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors"
+                  className="mt-4 w-full px-4 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-lg text-sm font-semibold transition-all border border-gray-200 hover:border-gray-300"
                 >
-                  Copy Response
+                  📋 Copy Response
                 </button>
               )}
             </div>
@@ -550,17 +553,17 @@ function QueryPageContent() {
 
       {/* AI-Powered Summary Section */}
       {!loading && responses.length > 0 && (
-        <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-lg border-2 border-purple-200 p-6 mb-8">
-          <div className="flex items-center justify-between mb-4">
+        <div className="info-panel mb-8">
+          <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
             <div className="flex items-center">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 flex items-center justify-center mr-3">
-                <span className="text-white text-xl">🤖</span>
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-acm-brand to-acm-brand-dark flex items-center justify-center mr-4 shadow-md">
+                <span className="text-white text-2xl">🤖</span>
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">
+                <h3 className="text-xl font-bold text-gray-900">
                   AI-Generated Summary
                 </h3>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-600 mt-1">
                   Condensed analysis from all {responses.filter(r => !r.error).length} model responses
                 </p>
               </div>
@@ -571,7 +574,7 @@ function QueryPageContent() {
                   navigator.clipboard.writeText(summary);
                   alert('Summary copied to clipboard!');
                 }}
-                className="px-4 py-2 bg-white border border-purple-300 text-purple-700 rounded-lg text-sm font-medium hover:bg-purple-50 transition-colors"
+                className="btn-secondary text-sm shrink-0"
               >
                 Copy Summary
               </button>
@@ -580,13 +583,13 @@ function QueryPageContent() {
 
           {summaryLoading ? (
             <div className="animate-pulse space-y-3">
-              <div className="h-4 bg-purple-200 rounded w-full"></div>
-              <div className="h-4 bg-purple-200 rounded w-5/6"></div>
-              <div className="h-4 bg-purple-200 rounded w-4/6"></div>
+              <div className="h-4 bg-acm-brand/20 rounded w-full"></div>
+              <div className="h-4 bg-acm-brand/20 rounded w-5/6"></div>
+              <div className="h-4 bg-acm-brand/20 rounded w-4/6"></div>
             </div>
           ) : summary ? (
             <div className="prose prose-sm max-w-none">
-              <p className="text-gray-800 leading-relaxed whitespace-pre-wrap bg-white/70 p-4 rounded-lg border border-purple-100">
+              <p className="text-gray-800 leading-relaxed whitespace-pre-wrap bg-white p-5 rounded-lg border border-acm-brand/20 shadow-sm">
                 {summary}
               </p>
             </div>
@@ -596,9 +599,9 @@ function QueryPageContent() {
             </div>
           )}
 
-          <div className="mt-4 pt-4 border-t border-purple-200">
+          <div className="mt-5 pt-5 border-t border-acm-brand/20">
             <div className="flex items-center text-xs text-gray-600">
-              <svg className="w-4 h-4 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 mr-2 text-acm-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               This summary synthesizes key insights and consensus points from Claude, GPT-4, Gemini, and Grok responses using Claude API.
@@ -609,37 +612,38 @@ function QueryPageContent() {
 
       {/* Patent Intelligence Section */}
       {!loading && patents.length > 0 && (
-        <div className="bg-white rounded-lg border-2 border-purple-200 p-6 mb-8">
-          <div className="flex items-center justify-between mb-4">
+        <div className="section-container mb-8">
+          <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
             <div className="flex items-center">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 flex items-center justify-center mr-3">
-                <span className="text-white text-xl">📜</span>
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-acm-gold to-acm-gold-light flex items-center justify-center mr-4 shadow-md">
+                <span className="text-white text-2xl">📜</span>
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">
+                <h3 className="text-xl font-bold text-gray-900">
                   Patent Intelligence
                 </h3>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-600 mt-1">
                   Relevant patents from Google Patents • {patentCount} results
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <div className="text-xs text-gray-500 bg-purple-50 px-3 py-2 rounded-lg border border-purple-200">
-                <span className="font-semibold text-purple-700">{patentCount}</span> patents analyzed by all 4 LLMs
+              <div className="badge badge-acm">
+                <span className="font-bold">{patentCount}</span>
+                <span className="ml-1">patents analyzed by all 4 LLMs</span>
               </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="compact-grid">
             {patents.map((patent, index) => (
               <PatentCard key={patent.patentNumber || index} patent={patent} />
             ))}
           </div>
 
-          <div className="mt-4 pt-4 border-t border-purple-200">
+          <div className="mt-6 pt-5 border-t border-gray-200">
             <div className="flex items-center text-xs text-gray-600">
-              <svg className="w-4 h-4 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 mr-2 text-acm-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               Patent data is automatically fetched from Google Patents and provided as context to all LLM models for IP-aware analysis.
@@ -650,34 +654,40 @@ function QueryPageContent() {
 
       {/* Human Decision Panel */}
       {!loading && responses.length > 0 && (
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            Human Decision & Approval
-          </h3>
-          <p className="text-sm text-gray-600 mb-4">
-            Review all responses and select which LLM's analysis you want to use, or provide your own custom answer.
-          </p>
+        <div className="section-container">
+          <div className="section-header">
+            <div>
+              <h3 className="text-xl font-bold text-gray-900">
+                Human Decision & Approval
+              </h3>
+              <p className="text-sm text-gray-600 mt-1">
+                Review all responses and select which LLM's analysis you want to use, or provide your own custom answer.
+              </p>
+            </div>
+          </div>
 
-          <div className="space-y-3 mb-4">
+          <div className="space-y-3 mb-6">
             {responses.filter(r => !r.error).map((response) => (
-              <label key={response.provider} className="flex items-start p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+              <label key={response.provider} className="flex items-start p-4 border-2 border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 cursor-pointer transition-all">
                 <input
                   type="radio"
                   name="selected_llm"
                   value={response.provider}
-                  className="mt-1 mr-3"
+                  className="mt-1 mr-4 w-4 h-4 text-acm-brand focus:ring-acm-brand"
                 />
-                <div>
-                  <span className={`font-medium ${getLLMColor(response.provider)} capitalize`}>
-                    {response.provider}
-                  </span>
-                  {response.confidenceScore && (
-                    <span className="ml-2 text-sm text-gray-500">
-                      ({response.confidenceScore}% confidence)
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className={`font-bold ${getLLMColor(response.provider)} capitalize text-lg`}>
+                      {response.provider}
                     </span>
-                  )}
-                  <p className="text-sm text-gray-600 mt-1 line-clamp-2">
-                    {response.responseText.substring(0, 200)}...
+                    {response.confidenceScore && (
+                      <span className="badge badge-acm text-xs">
+                        {response.confidenceScore}% confidence
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm text-gray-700 line-clamp-3 leading-relaxed">
+                    {response.responseText.substring(0, 250)}...
                   </p>
                 </div>
               </label>
@@ -686,19 +696,19 @@ function QueryPageContent() {
 
           <textarea
             rows={4}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-4"
+            className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-acm-brand focus:border-acm-brand transition-all mb-6"
             placeholder="Optional: Add notes or custom analysis..."
           />
 
-          <div className="flex gap-4">
-            <button className="btn-primary">
-              Approve & Save Decision
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button className="btn-primary flex-1 sm:flex-none">
+              ✓ Approve & Save Decision
             </button>
             <button
               onClick={() => exportAllResponses()}
-              className="btn-secondary"
+              className="btn-secondary flex-1 sm:flex-none"
             >
-              Export All Responses
+              📥 Export All Responses
             </button>
           </div>
         </div>
