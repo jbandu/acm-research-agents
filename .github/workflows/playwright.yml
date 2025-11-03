@@ -47,11 +47,11 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y postgresql-client
 
-          # Run database migrations/setup
-          # Uncomment and modify based on your migration tool
-          # npx prisma migrate deploy
-          # or
-          # psql $DATABASE_URL < schema.sql
+          # Make setup script executable
+          chmod +x scripts/setup-test-db.sh
+
+          # Run database schema setup
+          ./scripts/setup-test-db.sh
 
       - name: Seed test data
         env:
