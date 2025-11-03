@@ -39,10 +39,27 @@ export default function Home() {
   const fetchData = async () => {
     try {
       const [workflowsRes, statsRes] = await Promise.all([
-        fetch('/api/workflows'),
-        fetch('/api/history?limit=1000'), // Get stats from history
+        fetch('/api/workflows').catch(err => {
+          console.error('Failed to fetch workflows:', err);
+          return { ok: false, json: async () => ({ workflows: [] }) };
+        }),
+        fetch('/api/history?limit=1000').catch(err => {
+          console.error('Failed to fetch history:', err);
+          return { ok: false, json: async () => ({ queries: [] }) };
+        }),
       ]);
 
+      const workflowsData = await workflowsRes.json().catch((err) => {
+        console.error('Failed to parse workflows JSON:', err);
+        return { workflows: [] };
+      });
+      const historyData = await statsRes.json().catch((err) => {
+        console.error('Failed to parse history JSON:', err);
+        return { queries: [] };
+      });
+
+      console.log('Workflows data:', JSON.stringify(workflowsData, null, 2));
+      console.log('History data:', JSON.stringify(historyData, null, 2));
       // Check if responses are OK before parsing JSON
       if (!workflowsRes.ok || !statsRes.ok) {
         console.error('Failed to fetch data');
@@ -53,21 +70,25 @@ export default function Home() {
       const workflowsData = await workflowsRes.json();
       const historyData = await statsRes.json();
 
-      setWorkflows(workflowsData.workflows || []);
+      const workflowsList = Array.isArray(workflowsData.workflows) ? workflowsData.workflows : [];
+      setWorkflows(workflowsList);
 
       // Calculate stats
-      const queries = historyData.queries || [];
+      const queries = Array.isArray(historyData.queries) ? historyData.queries : [];
       const consensusQueries = queries.filter((q: any) =>
         q.consensus_level === 'high' || q.consensus_level === 'medium'
       );
 
       setStats({
         totalQueries: queries.length,
-        totalWorkflows: workflowsData.workflows?.length || 0,
+        totalWorkflows: Array.isArray(workflowsData.workflows) ? workflowsData.workflows.length : 0,
         avgConsensusRate: queries.length > 0 ? Math.round((consensusQueries.length / queries.length) * 100) : 0,
       });
     } catch (error) {
       console.error('Error fetching data:', error);
+      // Set safe defaults on error
+      setWorkflows([]);
+      setStats({ totalQueries: 0, totalWorkflows: 0, avgConsensusRate: 0 });
     } finally {
       setLoading(false);
     }
@@ -142,7 +163,7 @@ export default function Home() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
               <div className="bg-white rounded-lg shadow-md p-6 border border-gray-100">
                 <div className="text-4xl font-bold text-blue-600 mb-2">
-                  {loading ? '...' : stats.totalQueries}
+                  {loading ? '...' : String(stats.totalQueries || 0)}
                 </div>
                 <div className="text-sm text-gray-600 font-medium">Research Queries</div>
                 <div className="text-xs text-gray-500 mt-1">Analyzed across 4 LLMs</div>
@@ -150,7 +171,7 @@ export default function Home() {
 
               <div className="bg-white rounded-lg shadow-md p-6 border border-gray-100">
                 <div className="text-4xl font-bold text-purple-600 mb-2">
-                  {loading ? '...' : stats.avgConsensusRate}%
+                  {loading ? '...' : `${String(stats.avgConsensusRate || 0)}%`}
                 </div>
                 <div className="text-sm text-gray-600 font-medium">Consensus Rate</div>
                 <div className="text-xs text-gray-500 mt-1">High agreement on insights</div>
@@ -158,7 +179,7 @@ export default function Home() {
 
               <div className="bg-white rounded-lg shadow-md p-6 border border-gray-100">
                 <div className="text-4xl font-bold text-indigo-600 mb-2">
-                  {loading ? '...' : stats.totalWorkflows}
+                  {loading ? '...' : String(stats.totalWorkflows || 0)}
                 </div>
                 <div className="text-sm text-gray-600 font-medium">Research Workflows</div>
                 <div className="text-xs text-gray-500 mt-1">Domain-optimized templates</div>
@@ -461,18 +482,18 @@ export default function Home() {
                   className="bg-white rounded-lg p-6 border border-gray-200 hover:border-blue-500 hover:shadow-lg transition-all duration-300"
                 >
                   <div className="flex items-start justify-between mb-4">
-                    <div className="text-3xl">{workflow.icon || '🔬'}</div>
+                    <div className="text-3xl">{String(workflow.icon || '🔬')}</div>
                     <span className="text-xs font-medium px-3 py-1 bg-blue-100 text-blue-800 rounded-full">
-                      {workflow.domain}
+                      {String(workflow.domain || 'General')}
                     </span>
                   </div>
 
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{workflow.name}</h3>
-                  <p className="text-sm text-gray-600 mb-4 line-clamp-2">{workflow.description}</p>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{String(workflow.name || 'Workflow')}</h3>
+                  <p className="text-sm text-gray-600 mb-4 line-clamp-2">{String(workflow.description || '')}</p>
 
                   <div className="flex justify-between items-center pt-4 border-t border-gray-100">
                     <span className="text-xs text-gray-500">
-                      {workflow.use_count || 0} uses
+                      {String(workflow.use_count || 0)} uses
                     </span>
                     <Link
                       href={session ? `/query?workflow=${workflow.id}` : '/auth/signin'}
@@ -636,9 +657,9 @@ export default function Home() {
             )}
           </div>
 
-          {session && (
+          {session && session.user && (
             <p className="mt-6 text-blue-200 text-sm">
-              Welcome back, {session.user?.name || session.user?.email}!
+              Welcome back, {String(session.user?.name || session.user?.email || 'User')}!
             </p>
           )}
         </div>

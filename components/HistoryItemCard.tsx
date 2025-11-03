@@ -107,6 +107,117 @@ export default function HistoryItemCard({
     });
   };
 
+  const exportQuery = () => {
+    if (responses.length === 0) {
+      alert('No responses to export. Expand the query first to load responses.');
+      return;
+    }
+
+    const exportData = {
+      query_id: query.id,
+      query_text: query.query_text,
+      workflow: query.workflow?.name || 'Generic',
+      created_at: query.created_at,
+      status: query.status,
+      consensus: query.consensus,
+      execution_time_seconds: query.execution?.execution_time_seconds,
+      responses: responses.map(r => ({
+        provider: r.llm_provider,
+        model: r.model_name,
+        response: r.response_text,
+        confidence_score: r.confidence_score,
+        sources: r.sources,
+        tokens_used: r.tokens_used,
+        response_time_ms: r.response_time_ms,
+        error: r.error
+      }))
+    };
+
+    // Export format selection
+    const format = prompt('Export format?\n1. JSON (full data)\n2. Markdown (readable)\n3. CSV (tabular)\n\nEnter 1, 2, or 3:');
+
+    if (!format) return;
+
+    let blob: Blob;
+    let filename: string;
+
+    switch(format) {
+      case '1': // JSON
+        blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+        filename = `query-${query.id}.json`;
+        break;
+
+      case '2': // Markdown
+        let markdown = `# Research Query Results\n\n`;
+        markdown += `**Query:** ${query.query_text}\n\n`;
+        markdown += `**Workflow:** ${exportData.workflow}\n`;
+        markdown += `**Created:** ${formatDate(query.created_at)}\n`;
+        markdown += `**Status:** ${query.status}\n\n`;
+
+        if (query.consensus) {
+          markdown += `## Consensus\n\n`;
+          markdown += `- **Level:** ${query.consensus.consensus_level}\n\n`;
+        }
+
+        markdown += `## Responses\n\n`;
+        responses.forEach(r => {
+          markdown += `### ${r.llm_provider.toUpperCase()} - ${r.model_name}\n\n`;
+          if (r.error) {
+            markdown += `**Error:** ${r.error}\n\n`;
+          } else {
+            markdown += `${r.response_text}\n\n`;
+            markdown += `**Metadata:**\n`;
+            if (r.confidence_score) markdown += `- Confidence: ${r.confidence_score}%\n`;
+            markdown += `- Response Time: ${(r.response_time_ms / 1000).toFixed(2)}s\n`;
+            if (r.tokens_used) markdown += `- Tokens: ${r.tokens_used.toLocaleString()}\n`;
+            markdown += `\n`;
+          }
+          markdown += `---\n\n`;
+        });
+
+        blob = new Blob([markdown], { type: 'text/markdown' });
+        filename = `query-${query.id}.md`;
+        break;
+
+      case '3': // CSV
+        let csv = 'Provider,Model,Confidence,ResponseTime(s),Tokens,Response,Error\n';
+        responses.forEach(r => {
+          const row = [
+            r.llm_provider,
+            r.model_name,
+            r.confidence_score || '',
+            (r.response_time_ms / 1000).toFixed(2),
+            r.tokens_used || '',
+            `"${(r.response_text || '').replace(/"/g, '""').substring(0, 500)}..."`,
+            r.error || ''
+          ];
+          csv += row.join(',') + '\n';
+        });
+
+        blob = new Blob([csv], { type: 'text/csv' });
+        filename = `query-${query.id}.csv`;
+        break;
+
+      default:
+        alert('Invalid format selected');
+        return;
+    }
+
+    // Download
+    if (typeof window !== 'undefined') {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      alert(`Exported to ${filename}`);
+    }
+  };
+
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300">
       {/* Compact View - Header */}
@@ -335,8 +446,10 @@ export default function HistoryItemCard({
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      navigator.clipboard.writeText(query.query_text);
-                      alert('Query copied to clipboard!');
+                      if (typeof window !== 'undefined' && navigator.clipboard) {
+                        navigator.clipboard.writeText(query.query_text);
+                        alert('Query copied to clipboard!');
+                      }
                     }}
                     className="inline-flex items-center px-4 py-2 border-2 border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
                   >

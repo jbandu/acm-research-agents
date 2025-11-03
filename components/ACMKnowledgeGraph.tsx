@@ -378,9 +378,13 @@ function KnowledgeGraphContent() {
         };
 
       default: // force
+        // Use deterministic positioning based on index to avoid hydration mismatch
+        const gridColumns = Math.ceil(Math.sqrt(total));
+        const row = Math.floor(index / gridColumns);
+        const col = index % gridColumns;
         return {
-          x: Math.random() * 1000,
-          y: Math.random() * 800
+          x: 100 + col * 150 + (row % 2) * 75,
+          y: 100 + row * 150
         };
     }
   };

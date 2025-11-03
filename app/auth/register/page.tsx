@@ -40,14 +40,14 @@ export default function RegisterPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.error || 'Registration failed');
+        setError(String(data.error || 'Registration failed'));
         return;
       }
 
       // Success - redirect to sign in
       router.push('/auth/signin?registered=true');
-    } catch (error) {
-      setError('An error occurred during registration');
+    } catch (error: any) {
+      setError(String(error?.message || 'An error occurred during registration'));
     } finally {
       setLoading(false);
     }
@@ -77,7 +77,7 @@ export default function RegisterPage() {
                   </svg>
                 </div>
                 <div className="ml-3">
-                  <p className="text-sm text-red-800">{error}</p>
+                  <p className="text-sm text-red-800">{String(error)}</p>
                 </div>
               </div>
             </div>
