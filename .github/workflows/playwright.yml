@@ -1,99 +1,91 @@
-name: Playwright Tests
+name: E2E Tests (Post-Deploy)
 
 on:
-  push:
-    branches: [main, master, develop]
-  pull_request:
-    branches: [main, master, develop]
+  # Trigger after Vercel deployment completes
+  deployment_status:
+
+  # Allow manual trigger
+  workflow_dispatch:
 
 jobs:
-  test:
-    timeout-minutes: 60
+  test-production:
+    # Only run when Vercel deployment succeeds
+    if: github.event_name == 'workflow_dispatch' || (github.event.deployment_status.state == 'success' && github.event.deployment_status.environment == 'Production')
+
+    timeout-minutes: 10
     runs-on: ubuntu-latest
 
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: acm_test
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
-
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Install Playwright Browsers
-        run: npx playwright install --with-deps chromium
-
-      - name: Setup test database
-        env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/acm_test
+      - name: Install dependencies (Playwright only)
         run: |
-          # Install PostgreSQL client
-          sudo apt-get update
-          sudo apt-get install -y postgresql-client
+          # Only install Playwright and its dependencies
+          npm ci --include=dev
+          npx playwright install --with-deps chromium
 
-          # Make setup script executable
-          chmod +x scripts/setup-test-db.sh
+      - name: Wait for deployment to be fully ready
+        run: |
+          echo "🕐 Waiting for deployment to be fully ready..."
+          npx wait-on https://acm-pi-three.vercel.app -t 60000
+          sleep 5  # Extra buffer for CDN propagation
 
-          # Run database schema setup
-          ./scripts/setup-test-db.sh
-
-      - name: Seed test data
+      - name: Run E2E tests against production
         env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/acm_test
-          NEXTAUTH_URL: http://localhost:3000
-          NEXTAUTH_SECRET: test-secret-key-for-ci
-        run: npm run seed:test
-
-      - name: Build application
-        env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/acm_test
-          NEXTAUTH_URL: http://localhost:3000
-          NEXTAUTH_SECRET: test-secret-key-for-ci
-        run: npm run build
-
-      - name: Run Playwright tests
-        env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/acm_test
-          NEXTAUTH_URL: http://localhost:3000
-          NEXTAUTH_SECRET: test-secret-key-for-ci
-          PLAYWRIGHT_TEST_BASE_URL: http://localhost:3000
+          PLAYWRIGHT_TEST_BASE_URL: https://acm-pi-three.vercel.app
           CI: true
+          # Test credentials (if needed for authenticated tests)
+          TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL || 'test@example.com' }}
+          TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD || 'test-password' }}
         run: |
-          # Start the application in background
-          npm run start &
-
-          # Wait for the app to be ready
-          npx wait-on http://localhost:3000 -t 60000
-
-          # Run tests
+          echo "🧪 Running E2E tests against production..."
           npm run test -- --project=chromium
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: playwright-report
           path: playwright-report/
-          retention-days: 30
+          retention-days: 14
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload failure screenshots
+        uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: playwright-screenshots
+          name: test-failures
           path: test-results/
           retention-days: 7
+
+      - name: Comment PR with results
+        if: github.event_name == 'deployment_status' && github.event.deployment_status.state == 'success'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            let comment = '## 🎭 E2E Test Results\n\n';
+            comment += `✅ Tests completed against production deployment\n`;
+            comment += `🔗 [View Deployment](${context.payload.deployment_status.target_url})\n`;
+
+            // Find related PR
+            const prs = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: context.payload.deployment.sha
+            });
+
+            if (prs.data.length > 0) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prs.data[0].number,
+                body: comment
+              });
+            }
