@@ -52,9 +52,12 @@ test.describe('Authentication Flow', () => {
   test('should successfully login with valid credentials', async ({ page }) => {
     await page.goto('/auth/signin');
 
-    // Fill in valid test credentials
-    await page.fill('input[type="email"]', 'test@acm.com');
-    await page.fill('input[type="password"]', 'TestPassword123!');
+    // Fill in valid test credentials (use environment variables for production)
+    const testEmail = process.env.TEST_USER_EMAIL || 'test@acm.com';
+    const testPassword = process.env.TEST_USER_PASSWORD || 'TestPassword123!';
+
+    await page.fill('input[type="email"]', testEmail);
+    await page.fill('input[type="password"]', testPassword);
 
     // Submit form
     await page.click('button[type="submit"]');

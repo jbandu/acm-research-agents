@@ -41,9 +41,9 @@ jobs:
         env:
           PLAYWRIGHT_TEST_BASE_URL: https://acm-pi-three.vercel.app
           CI: true
-          # Test credentials (if needed for authenticated tests)
-          TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL || 'test@example.com' }}
-          TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD || 'test-password' }}
+          # Test credentials (use GitHub Secrets for production auth)
+          TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
+          TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
         run: |
           echo "🧪 Running E2E tests against production..."
           npm run test -- --project=chromium
