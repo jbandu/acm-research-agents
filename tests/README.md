@@ -143,6 +143,44 @@ npx playwright test tests/auth.spec.ts --debug
 3. Look for specific error messages
 4. Verify environment variables are set correctly
 
+## 🧹 Test Data Cleanup
+
+**Current Status:** All existing tests are **read-only** - they don't create data that needs cleanup.
+
+However, cleanup utilities are provided in `helpers/cleanup.ts` for future tests that create data.
+
+### Using Cleanup Utilities
+
+```typescript
+import { CleanupTracker } from './helpers/cleanup';
+
+test.describe('Query Creation Tests', () => {
+  const cleanup = new CleanupTracker();
+
+  test.afterAll(async ({ request }) => {
+    await cleanup.cleanup(request);
+  });
+
+  test('should create query', async ({ page, request }) => {
+    // ... create query ...
+    cleanup.trackQuery(queryId); // Track for cleanup
+  });
+});
+```
+
+### Available Functions
+
+- `deleteTestQueries(request, ids[])` - Delete specific queries
+- `deleteTestUsers(request, emails[])` - Delete test users (safety checks)
+- `deleteTestWorkflows(request, ids[])` - Delete workflows
+- `CleanupTracker` - Automatic cleanup tracking
+
+### Safety Features
+
+- Only emails with "test" or "example" can be deleted
+- Failed deletions are logged as warnings (don't fail tests)
+- Cleanup happens in `afterAll` to ensure it runs even if tests fail
+
 ## 📝 Writing New Tests
 
 ### Test Structure

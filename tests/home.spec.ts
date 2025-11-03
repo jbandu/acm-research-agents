@@ -59,10 +59,13 @@ test.describe('Home Page', () => {
   });
 
   test('should show authenticated navigation after login', async ({ page }) => {
-    // Login first
+    // Login first with environment credentials
+    const testEmail = process.env.TEST_USER_EMAIL || 'test@acm.com';
+    const testPassword = process.env.TEST_USER_PASSWORD || 'TestPassword123!';
+
     await page.goto('/auth/signin');
-    await page.fill('input[type="email"]', 'test@acm.com');
-    await page.fill('input[type="password"]', 'TestPassword123!');
+    await page.fill('input[type="email"]', testEmail);
+    await page.fill('input[type="password"]', testPassword);
     await page.click('button[type="submit"]');
     await page.waitForURL('/');
 
