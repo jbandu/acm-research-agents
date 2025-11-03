@@ -4,7 +4,7 @@ export interface Query {
   id: string;
   workflow_id?: string;
   query_text: string;
-  created_by: string;
+  user_id: string;
   status: 'processing' | 'completed' | 'failed';
   created_at: Date;
 }
@@ -12,7 +12,7 @@ export interface Query {
 export interface LLMResponse {
   id: string;
   query_id: string;
-  llm_provider: 'claude' | 'openai' | 'gemini' | 'grok';
+  llm_provider: 'claude' | 'openai' | 'gemini' | 'grok' | 'ollama';
   model_name: string;
   response_text: string;
   confidence_score?: number;
@@ -64,7 +64,7 @@ export interface HistoryFilters {
   workflows?: string[]; // workflow IDs
   categories?: string[]; // workflow categories
   consensusLevels?: ('high' | 'medium' | 'low' | 'none')[];
-  llmProviders?: ('claude' | 'openai' | 'gemini' | 'grok')[];
+  llmProviders?: ('claude' | 'openai' | 'gemini' | 'grok' | 'ollama')[];
   status?: ('processing' | 'completed' | 'failed')[];
   search?: string;
 }

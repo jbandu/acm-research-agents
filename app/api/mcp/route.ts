@@ -28,6 +28,19 @@ declare global {
     webSocket?: WebSocket;
   }
 }
+ * MCP (Model Context Protocol) HTTP Server for OpenAI Agent Builder
+ *
+ * This Edge route implements a minimal MCP server that:
+ * - Exposes ACM research tools via JSON-RPC over HTTP
+ * - Forwards tool calls to an HTTP webhook
+ * - Handles session initialization, tool listing, and tool execution
+ *
+ * Runtime: Vercel Edge (HTTP-based, no WebSockets)
+ */
+
+import { NextRequest, NextResponse } from 'next/server';
+
+export const runtime = 'edge';
 
 // ============================================================================
 // TOOL DEFINITIONS
@@ -352,7 +365,7 @@ function handleInitialize(id: string | number | undefined): JsonRpcResponse {
     protocolVersion: '2024-11-05',
     serverInfo: {
       name: 'acm-mcp',
-      version: '0.1.0'
+      version: '0.2.0'
     },
     capabilities: {
       tools: {}
@@ -519,5 +532,111 @@ export async function GET(request: Request) {
   return new Response(null, {
     status: 101,
     webSocket: client,
+// HTTP HANDLERS (Vercel-compatible)
+// ============================================================================
+
+/**
+ * GET handler - Returns server info and available methods
+ */
+export async function GET(request: NextRequest) {
+  // Check authorization
+  const serverToken = process.env.MCP_SERVER_TOKEN;
+  if (serverToken) {
+    const authHeader = request.headers.get('Authorization');
+    const expectedAuth = `Bearer ${serverToken}`;
+
+    if (!authHeader || authHeader !== expectedAuth) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        {
+          status: 401,
+          headers: { 'WWW-Authenticate': 'Bearer' }
+        }
+      );
+    }
+  }
+
+  // Return server info
+  return NextResponse.json({
+    name: 'ACM MCP Server',
+    version: '0.2.0',
+    protocol: 'MCP over HTTP (JSON-RPC 2.0)',
+    transport: 'HTTP POST',
+    documentation: 'https://modelcontextprotocol.io',
+    endpoints: {
+      rpc: '/api/mcp (POST)',
+      health: '/api/mcp (GET)'
+    },
+    methods: [
+      'initialize',
+      'session/initialize',
+      'tools/list',
+      'tools/call',
+      'ping'
+    ],
+    tools: TOOLS.map(t => ({
+      name: t.name,
+      description: t.description
+    }))
+  });
+}
+
+/**
+ * POST handler - Processes JSON-RPC requests
+ */
+export async function POST(request: NextRequest) {
+  // Check authorization
+  const serverToken = process.env.MCP_SERVER_TOKEN;
+  if (serverToken) {
+    const authHeader = request.headers.get('Authorization');
+    const expectedAuth = `Bearer ${serverToken}`;
+
+    if (!authHeader || authHeader !== expectedAuth) {
+      return NextResponse.json(
+        createErrorResponse(undefined, -32001, 'Unauthorized'),
+        {
+          status: 401,
+          headers: { 'WWW-Authenticate': 'Bearer' }
+        }
+      );
+    }
+  }
+
+  // Parse request body
+  let body: string;
+  try {
+    body = await request.text();
+  } catch (error) {
+    return NextResponse.json(
+      createErrorResponse(undefined, -32700, 'Parse error: Could not read request body')
+    );
+  }
+
+  // Handle the JSON-RPC message
+  const responseJson = await handleMessage(body);
+
+  // Return JSON-RPC response
+  return new NextResponse(responseJson, {
+    status: 200,
+    headers: {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    }
+  });
+}
+
+/**
+ * OPTIONS handler - CORS preflight
+ */
+export async function OPTIONS(request: NextRequest) {
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    }
   });
 }

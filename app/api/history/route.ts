@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
     // Build dynamic query
     let queryText = `
       SELECT
-        q.id, q.workflow_id, q.query_text, q.created_by, q.status, q.created_at,
+        q.id, q.workflow_id, q.query_text, q.user_id, q.status, q.created_at,
         w.name as workflow_name, w.category as workflow_category, w.icon as workflow_icon,
         cr.consensus_level, cr.agreeing_providers, cr.conflicting_providers,
         we.execution_time_seconds,
@@ -140,7 +140,7 @@ export async function GET(request: NextRequest) {
       id: q.id,
       workflow_id: q.workflow_id,
       query_text: q.query_text,
-      created_by: q.created_by,
+      user_id: q.user_id,
       status: q.status,
       created_at: q.created_at,
       response_count: q.response_count,

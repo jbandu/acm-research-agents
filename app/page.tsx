@@ -21,14 +21,20 @@ interface Stats {
 }
 
 export default function Home() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [workflows, setWorkflows] = useState<Workflow[]>([]);
   const [stats, setStats] = useState<Stats>({ totalQueries: 0, totalWorkflows: 0, avgConsensusRate: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    // Only fetch data if user is authenticated
+    if (status === 'authenticated') {
+      fetchData();
+    } else if (status === 'unauthenticated') {
+      setLoading(false);
+    }
+    // If status is 'loading', keep loading state true
+  }, [status]);
 
   const fetchData = async () => {
     try {
@@ -54,6 +60,15 @@ export default function Home() {
 
       console.log('Workflows data:', JSON.stringify(workflowsData, null, 2));
       console.log('History data:', JSON.stringify(historyData, null, 2));
+      // Check if responses are OK before parsing JSON
+      if (!workflowsRes.ok || !statsRes.ok) {
+        console.error('Failed to fetch data');
+        setLoading(false);
+        return;
+      }
+
+      const workflowsData = await workflowsRes.json();
+      const historyData = await statsRes.json();
 
       const workflowsList = Array.isArray(workflowsData.workflows) ? workflowsData.workflows : [];
       setWorkflows(workflowsList);

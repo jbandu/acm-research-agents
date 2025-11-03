@@ -12,6 +12,7 @@
     "test:headed": "playwright test --headed",
     "test:debug": "playwright test --debug",
     "seed:test": "node scripts/seed-test-data.js"
+    "test:serpapi": "node scripts/test-serpapi.js"
   },
   "keywords": [
     "biotech",
@@ -39,6 +40,7 @@
     "react-dom": "^19.2.0",
     "react-leaflet": "^5.0.0",
     "reactflow": "^11.11.4",
+    "serpapi": "^2.2.1",
     "typescript": "^5.9.3"
   },
   "devDependencies": {

@@ -687,10 +687,10 @@ function KnowledgeGraphContent() {
       </div>
 
       {/* ReactFlow Graph or Domain Cards View */}
-      <div className="h-full pt-64 relative">
+      <div className="h-full pt-64 relative overflow-y-auto">
         {/* Show domain cards grid when no domain is selected */}
         {!selectedDomain && nodes.length === 0 ? (
-          <div className="container mx-auto px-8 py-12">
+          <div className="container mx-auto px-8 py-12 pb-20">
             <div className="text-center mb-12">
               <h2 className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent mb-4">
                 ACM Research Domains

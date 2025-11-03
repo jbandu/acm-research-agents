@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { ContextLevelSelector } from '@/components/ContextLevelSelector';
 import { DataSourceSelector } from '@/components/DataSourceSelector';
 import { CostEstimator } from '@/components/CostEstimator';
+import PatentCard from '@/components/PatentCard';
 
 interface LLMResponse {
   provider: 'claude' | 'openai' | 'gemini' | 'grok';
@@ -40,6 +41,14 @@ function QueryPageContent() {
   const [contextLevel, setContextLevel] = useState<'minimal' | 'standard' | 'deep'>('standard');
   const [selectedDataSources, setSelectedDataSources] = useState<string[]>([]);
   const [showAdvanced, setShowAdvanced] = useState(false);
+
+  // Summary state
+  const [summary, setSummary] = useState<string>('');
+  const [summaryLoading, setSummaryLoading] = useState(false);
+
+  // Patent state
+  const [patents, setPatents] = useState<any[]>([]);
+  const [patentCount, setPatentCount] = useState(0);
 
   useEffect(() => {
     fetchWorkflows();
@@ -91,11 +100,52 @@ function QueryPageContent() {
       setResponses(data.responses || []);
       setConsensus(data.consensus || null);
       setCached(data.cached || false);
+      setPatents(data.patents || []);
+      setPatentCount(data.patent_count || 0);
+
+      // Generate summary after responses are received
+      if (data.responses && data.responses.length > 0) {
+        generateSummary(data.responses, queryText);
+      }
     } catch (error: any) {
       console.error('Query error:', error);
       alert(`Error: ${error.message}`);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const generateSummary = async (llmResponses: LLMResponse[], query: string) => {
+    setSummaryLoading(true);
+    setSummary('');
+
+    try {
+      const response = await fetch('/api/query/summarize', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query_text: query,
+          responses: llmResponses.filter(r => !r.error).map(r => ({
+            provider: r.provider,
+            model: r.model,
+            response: r.responseText,
+            confidence: r.confidenceScore
+          }))
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.summary) {
+        setSummary(data.summary);
+      }
+    } catch (error: any) {
+      console.error('Summary generation error:', error);
+      setSummary('Failed to generate summary. Please try again.');
+    } finally {
+      setSummaryLoading(false);
     }
   };
 
@@ -495,6 +545,106 @@ function QueryPageContent() {
               )}
             </div>
           ))}
+        </div>
+      )}
+
+      {/* AI-Powered Summary Section */}
+      {!loading && responses.length > 0 && (
+        <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-lg border-2 border-purple-200 p-6 mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 flex items-center justify-center mr-3">
+                <span className="text-white text-xl">🤖</span>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  AI-Generated Summary
+                </h3>
+                <p className="text-sm text-gray-600">
+                  Condensed analysis from all {responses.filter(r => !r.error).length} model responses
+                </p>
+              </div>
+            </div>
+            {summary && (
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(summary);
+                  alert('Summary copied to clipboard!');
+                }}
+                className="px-4 py-2 bg-white border border-purple-300 text-purple-700 rounded-lg text-sm font-medium hover:bg-purple-50 transition-colors"
+              >
+                Copy Summary
+              </button>
+            )}
+          </div>
+
+          {summaryLoading ? (
+            <div className="animate-pulse space-y-3">
+              <div className="h-4 bg-purple-200 rounded w-full"></div>
+              <div className="h-4 bg-purple-200 rounded w-5/6"></div>
+              <div className="h-4 bg-purple-200 rounded w-4/6"></div>
+            </div>
+          ) : summary ? (
+            <div className="prose prose-sm max-w-none">
+              <p className="text-gray-800 leading-relaxed whitespace-pre-wrap bg-white/70 p-4 rounded-lg border border-purple-100">
+                {summary}
+              </p>
+            </div>
+          ) : (
+            <div className="text-gray-500 text-sm italic">
+              Generating summary...
+            </div>
+          )}
+
+          <div className="mt-4 pt-4 border-t border-purple-200">
+            <div className="flex items-center text-xs text-gray-600">
+              <svg className="w-4 h-4 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              This summary synthesizes key insights and consensus points from Claude, GPT-4, Gemini, and Grok responses using Claude API.
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Patent Intelligence Section */}
+      {!loading && patents.length > 0 && (
+        <div className="bg-white rounded-lg border-2 border-purple-200 p-6 mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 flex items-center justify-center mr-3">
+                <span className="text-white text-xl">📜</span>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Patent Intelligence
+                </h3>
+                <p className="text-sm text-gray-600">
+                  Relevant patents from Google Patents • {patentCount} results
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="text-xs text-gray-500 bg-purple-50 px-3 py-2 rounded-lg border border-purple-200">
+                <span className="font-semibold text-purple-700">{patentCount}</span> patents analyzed by all 4 LLMs
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {patents.map((patent, index) => (
+              <PatentCard key={patent.patentNumber || index} patent={patent} />
+            ))}
+          </div>
+
+          <div className="mt-4 pt-4 border-t border-purple-200">
+            <div className="flex items-center text-xs text-gray-600">
+              <svg className="w-4 h-4 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Patent data is automatically fetched from Google Patents and provided as context to all LLM models for IP-aware analysis.
+            </div>
+          </div>
         </div>
       )}
 

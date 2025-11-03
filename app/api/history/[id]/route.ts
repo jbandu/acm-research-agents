@@ -12,7 +12,7 @@ export async function GET(
     // Get query details
     const queryResult = await query(
       `SELECT
-        q.id, q.workflow_id, q.query_text, q.created_by, q.status, q.created_at,
+        q.id, q.workflow_id, q.query_text, q.user_id, q.status, q.created_at,
         w.name as workflow_name, w.category as workflow_category,
         w.icon as workflow_icon, w.description as workflow_description,
         cr.consensus_level, cr.agreement_summary, cr.conflicts,
