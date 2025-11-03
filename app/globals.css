@@ -84,6 +84,14 @@
     @apply border-grok bg-gradient-to-br from-white to-grok/5;
   }
 
+  .llm-card-ollama {
+    @apply border-indigo-500 bg-gradient-to-br from-white to-indigo-500/5;
+  }
+
+  .llm-card-patents {
+    @apply border-amber-500 bg-gradient-to-br from-white to-amber-500/5;
+  }
+
   /* ACM-styled buttons */
   .btn-primary {
     @apply px-6 py-3 rounded-lg font-semibold transition-all duration-200;

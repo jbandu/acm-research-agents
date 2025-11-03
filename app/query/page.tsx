@@ -160,6 +160,10 @@ function QueryPageContent() {
         return baseClass + 'llm-card-gemini';
       case 'grok':
         return baseClass + 'llm-card-grok';
+      case 'ollama':
+        return baseClass + 'llm-card-ollama';
+      case 'patents':
+        return baseClass + 'llm-card-patents';
       default:
         return baseClass;
     }
@@ -175,6 +179,10 @@ function QueryPageContent() {
         return 'text-gemini';
       case 'grok':
         return 'text-grok';
+      case 'ollama':
+        return 'text-indigo-600';
+      case 'patents':
+        return 'text-amber-600';
       default:
         return 'text-gray-900';
     }
@@ -190,6 +198,10 @@ function QueryPageContent() {
         return 'bg-gemini';
       case 'grok':
         return 'bg-grok';
+      case 'ollama':
+        return 'bg-indigo-500';
+      case 'patents':
+        return 'bg-amber-500';
       default:
         return 'bg-gray-500';
     }
@@ -446,12 +458,12 @@ function QueryPageContent() {
       {/* Loading State */}
       {loading && (
         <div className="response-grid mb-8">
-          {['claude', 'openai', 'gemini', 'grok'].map((provider) => (
+          {['claude', 'openai', 'gemini', 'grok', 'ollama', 'patents'].map((provider) => (
             <div key={provider} className={getLLMCardClass(provider)}>
               <div className="flex items-center mb-4">
                 <div className={`w-3 h-3 rounded-full ${getLLMBgColor(provider)} mr-3 animate-pulse`}></div>
                 <h3 className={`text-lg font-bold ${getLLMColor(provider)} capitalize`}>
-                  {provider} - Processing...
+                  {provider === 'ollama' ? 'Llama 3.1 (Local)' : provider === 'patents' ? 'Google Patents' : provider} - Processing...
                 </h3>
               </div>
               <div className="animate-pulse space-y-3">
