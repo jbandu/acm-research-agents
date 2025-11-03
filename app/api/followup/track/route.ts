@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
         followup_question_id,
         original_query_id,
         new_query_id || null,
-        session.user.email || session.user.id
+        session.user.email || 'unknown'
       ]
     );
 
@@ -85,7 +85,7 @@ export async function PATCH(request: NextRequest) {
         led_to_insights || false,
         notes || null,
         usage_id,
-        session.user.email || session.user.id
+        session.user.email || 'unknown'
       ]
     );
 
