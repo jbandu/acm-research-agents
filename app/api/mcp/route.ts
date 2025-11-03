@@ -12,6 +12,20 @@
 export const runtime = 'edge';
 
 // ============================================================================
+// TYPE DECLARATIONS FOR CLOUDFLARE WORKERS (NOT AVAILABLE IN VERCEL)
+// ============================================================================
+
+// Note: WebSocketPair is a Cloudflare Workers API not available in Vercel Edge Runtime
+// This type declaration is added to prevent TypeScript errors during build
+// The actual WebSocket functionality is disabled on Vercel (see GET handler below)
+declare global {
+  class WebSocketPair {
+    0: WebSocket;
+    1: WebSocket;
+  }
+}
+
+// ============================================================================
 // TOOL DEFINITIONS
 // ============================================================================
 
@@ -419,6 +433,21 @@ async function handleMessage(message: string): Promise<string> {
 // ============================================================================
 
 export async function GET(request: Request) {
+  // Check if WebSocketPair is available (Cloudflare Workers only)
+  if (typeof WebSocketPair === 'undefined') {
+    return new Response(
+      JSON.stringify({
+        error: 'WebSocket server not supported',
+        message: 'Vercel Edge Runtime does not support WebSocket servers. This MCP endpoint requires Cloudflare Workers. Please use the HTTP webhook endpoints instead.',
+        alternative: 'Use POST /api/agent-webhook for tool execution'
+      }),
+      {
+        status: 501,
+        headers: { 'Content-Type': 'application/json' }
+      }
+    );
+  }
+
   // Check for required environment variables
   const serverToken = process.env.MCP_SERVER_TOKEN;
   if (!serverToken) {
