@@ -62,6 +62,9 @@ export default function HistoryItemCard({
   onReRun,
 }: HistoryItemCardProps) {
   const [responses, setResponses] = useState<LLMResponse[]>([]);
+  const [patents, setPatents] = useState<any[]>([]);
+  const [summary, setSummary] = useState<any>(null);
+  const [followupQuestions, setFollowupQuestions] = useState<any[]>([]);
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [expandedResponse, setExpandedResponse] = useState<string | null>(null);
 
@@ -77,6 +80,9 @@ export default function HistoryItemCard({
       const response = await fetch(`/api/history/${query.id}`);
       const data = await response.json();
       setResponses(data.responses || []);
+      setPatents(data.patents || []);
+      setSummary(data.summary || null);
+      setFollowupQuestions(data.followup_questions || []);
     } catch (error) {
       console.error('Error fetching query details:', error);
     } finally {
@@ -426,6 +432,138 @@ export default function HistoryItemCard({
                   })}
                 </div>
               </div>
+
+              {/* AI-Generated Summary */}
+              {summary && (
+                <div className="px-6 py-6 bg-gradient-to-br from-acm-blue-lightest to-white border-t border-gray-200">
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-acm-brand to-acm-brand-dark flex items-center justify-center shadow-md flex-shrink-0">
+                      <span className="text-white text-2xl">🤖</span>
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="text-lg font-bold text-gray-900 mb-2">AI-Generated Summary</h4>
+                      <p className="text-sm text-gray-700 leading-relaxed mb-3">{summary.summary_text}</p>
+                      <div className="flex items-center gap-4 text-xs text-gray-600">
+                        <span className="flex items-center gap-1">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          {summary.models_analyzed} models analyzed
+                        </span>
+                        {summary.confidence_level && (
+                          <span className={`px-2 py-0.5 rounded-full font-medium ${
+                            summary.confidence_level === 'high' ? 'bg-green-100 text-green-800' :
+                            summary.confidence_level === 'medium' ? 'bg-yellow-100 text-yellow-800' :
+                            'bg-orange-100 text-orange-800'
+                          }`}>
+                            {summary.confidence_level} confidence
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Follow-Up Questions (Perplexity-style) */}
+              {followupQuestions && followupQuestions.length > 0 && (
+                <div className="px-6 py-6 bg-white border-t border-gray-200">
+                  <div className="flex items-center gap-2 mb-4">
+                    <span className="text-lg">💡</span>
+                    <h4 className="text-sm font-semibold text-gray-700">Suggested Follow-Up Questions</h4>
+                  </div>
+                  <div className="space-y-3">
+                    {followupQuestions.map((fq, index) => (
+                      <button
+                        key={fq.id}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (typeof window !== 'undefined') {
+                            window.location.href = `/query?prefill=${encodeURIComponent(fq.question_text)}&source=followup&original_query=${query.id}&followup_id=${fq.id}`;
+                          }
+                        }}
+                        className="w-full text-left p-4 rounded-lg border-2 border-gray-200 hover:border-acm-brand hover:bg-acm-blue-lightest transition-all group"
+                      >
+                        <div className="flex items-start gap-3">
+                          <span className="flex-shrink-0 w-6 h-6 rounded-full bg-acm-brand text-white text-xs font-bold flex items-center justify-center">
+                            {index + 1}
+                          </span>
+                          <div className="flex-1">
+                            <p className="text-sm font-medium text-gray-900 group-hover:text-acm-brand mb-1">
+                              {fq.question_text}
+                            </p>
+                            {fq.rationale && (
+                              <p className="text-xs text-gray-600">{fq.rationale}</p>
+                            )}
+                            {fq.category && (
+                              <span className={`inline-block mt-2 px-2 py-0.5 rounded-full text-xs font-medium ${
+                                fq.category === 'deep-dive' ? 'bg-blue-100 text-blue-700' :
+                                fq.category === 'clarification' ? 'bg-purple-100 text-purple-700' :
+                                fq.category === 'alternative' ? 'bg-green-100 text-green-700' :
+                                'bg-yellow-100 text-yellow-700'
+                              }`}>
+                                {fq.category}
+                              </span>
+                            )}
+                          </div>
+                          <svg className="w-5 h-5 text-gray-400 group-hover:text-acm-brand flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Patent Intelligence */}
+              {patents && patents.length > 0 && (
+                <div className="px-6 py-6 bg-gradient-to-br from-amber-50 to-white border-t border-gray-200">
+                  <div className="flex items-center gap-2 mb-4">
+                    <span className="text-lg">📄</span>
+                    <h4 className="text-sm font-semibold text-gray-700">Relevant Patents ({patents.length})</h4>
+                  </div>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    {patents.slice(0, 6).map((patent) => (
+                      <a
+                        key={patent.id}
+                        href={patent.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block p-4 bg-white rounded-lg border-2 border-amber-200 hover:border-acm-gold hover:shadow-md transition-all group"
+                      >
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <span className="text-xs font-mono font-semibold text-acm-gold group-hover:text-acm-gold">
+                            {patent.patent_number}
+                          </span>
+                          {patent.relevance_score && (
+                            <span className="text-xs px-2 py-0.5 bg-amber-100 text-amber-800 rounded-full font-medium">
+                              {patent.relevance_score}% match
+                            </span>
+                          )}
+                        </div>
+                        <h5 className="text-sm font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-acm-gold">
+                          {patent.title}
+                        </h5>
+                        {patent.abstract && (
+                          <p className="text-xs text-gray-600 line-clamp-2 mb-2">{patent.abstract}</p>
+                        )}
+                        <div className="flex items-center justify-between text-xs text-gray-500">
+                          <span>{patent.assignee || 'Unknown'}</span>
+                          {patent.publication_date && (
+                            <span>{new Date(patent.publication_date).getFullYear()}</span>
+                          )}
+                        </div>
+                      </a>
+                    ))}
+                  </div>
+                  {patents.length > 6 && (
+                    <p className="text-xs text-gray-600 mt-3 text-center">
+                      + {patents.length - 6} more patents
+                    </p>
+                  )}
+                </div>
+              )}
 
               {/* Actions Bar */}
               <div className="px-6 py-4 bg-white border-t border-gray-200 flex items-center justify-between">

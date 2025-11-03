@@ -46,6 +46,38 @@ export async function GET(
       [id]
     );
 
+    // Get patent results
+    const patentsResult = await query(
+      `SELECT
+        id, patent_number, title, abstract, filing_date, publication_date,
+        assignee, inventors, url, relevance_score, created_at
+       FROM patent_results
+       WHERE query_id = $1
+       ORDER BY relevance_score DESC NULLS LAST, created_at ASC
+       LIMIT 10`,
+      [id]
+    );
+
+    // Get AI summary
+    const summaryResult = await query(
+      `SELECT
+        id, summary_text, models_analyzed, tokens_used, confidence_level,
+        key_insights, created_at
+       FROM ai_summaries
+       WHERE query_id = $1`,
+      [id]
+    );
+
+    // Get follow-up questions
+    const followupResult = await query(
+      `SELECT
+        id, question_text, rationale, category, position, created_at
+       FROM followup_questions
+       WHERE query_id = $1
+       ORDER BY position ASC`,
+      [id]
+    );
+
     // Get collections this query belongs to
     const collectionsResult = await query(
       `SELECT
@@ -59,6 +91,9 @@ export async function GET(
     return NextResponse.json({
       query: queryData,
       responses: responsesResult.rows,
+      patents: patentsResult.rows,
+      summary: summaryResult.rows.length > 0 ? summaryResult.rows[0] : null,
+      followup_questions: followupResult.rows,
       collections: collectionsResult.rows,
     });
   } catch (error: any) {
