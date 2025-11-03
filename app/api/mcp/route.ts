@@ -478,7 +478,7 @@ export async function GET(request: Request) {
   log('WebSocket connection established');
 
   // Handle incoming messages
-  server.addEventListener('message', async (event) => {
+  server.addEventListener('message', async (event: MessageEvent) => {
     try {
       const message = typeof event.data === 'string' ? event.data : String(event.data);
       log('Received message:', message);
@@ -507,7 +507,7 @@ export async function GET(request: Request) {
   });
 
   // Handle errors
-  server.addEventListener('error', (event) => {
+  server.addEventListener('error', (event: Event) => {
     log('WebSocket error:', event);
   });
 
