@@ -32,7 +32,7 @@ test.describe('Authentication Flow', () => {
     await expect(page.locator('input[name="name"]')).toBeVisible();
     await expect(page.locator('input[type="email"]')).toBeVisible();
     await expect(page.locator('input[name="password"]')).toBeVisible();
-    await expect(page.locator('input[name="confirmPassword"]')).toBeVisible();
+    await expect(page.locator('input[name="confirm-password"]')).toBeVisible();
   });
 
   test('should show validation error for invalid credentials', async ({ page }) => {
@@ -71,8 +71,8 @@ test.describe('Authentication Flow', () => {
     await page.waitForLoadState('networkidle');
 
     // Check for navigation items that only appear when logged in
-    await expect(page.locator('text=New Query').or(page.locator('text=Query'))).toBeVisible({ timeout: 10000 });
-    await expect(page.locator('text=Sign Out')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('nav a[href="/query"]')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('button:has-text("Sign Out")')).toBeVisible({ timeout: 10000 });
   });
 
   test('should show password mismatch error on registration', async ({ page }) => {
@@ -81,7 +81,7 @@ test.describe('Authentication Flow', () => {
     await page.fill('input[name="name"]', 'New User');
     await page.fill('input[type="email"]', 'newuser@example.com');
     await page.fill('input[name="password"]', 'Password123!');
-    await page.fill('input[name="confirmPassword"]', 'DifferentPassword123!');
+    await page.fill('input[name="confirm-password"]', 'DifferentPassword123!');
 
     await page.click('button[type="submit"]');
 

@@ -18,10 +18,10 @@ test.describe('Home Page', () => {
     await expect(signInButtons.first()).toBeVisible();
 
     // Check "How It Works" section
-    await expect(page.locator('text=How It Works')).toBeVisible();
-    await expect(page.locator('text=Ask Your Question')).toBeVisible();
-    await expect(page.locator('text=Parallel Analysis')).toBeVisible();
-    await expect(page.locator('text=Consensus Detection')).toBeVisible();
+    await expect(page.locator('h2:has-text("How It Works")')).toBeVisible();
+    await expect(page.locator('h3:has-text("Ask Your Question")')).toBeVisible();
+    await expect(page.locator('h3:has-text("Parallel Analysis")')).toBeVisible();
+    await expect(page.locator('h3:has-text("Consensus Detection")').first()).toBeVisible();
 
     // Check LLM models section
     await expect(page.locator('text=Claude Sonnet 4.5')).toBeVisible();
@@ -53,9 +53,9 @@ test.describe('Home Page', () => {
     await page.goto('/');
 
     // Check footer links
-    await expect(page.locator('footer').locator('text=Query')).toBeVisible();
-    await expect(page.locator('footer').locator('text=Workflows')).toBeVisible();
-    await expect(page.locator('footer').locator('text=History')).toBeVisible();
+    await expect(page.locator('footer a[href="/query"]')).toBeVisible();
+    await expect(page.locator('footer a[href="/workflows"]')).toBeVisible();
+    await expect(page.locator('footer a[href="/history"]')).toBeVisible();
   });
 
   test('should show authenticated navigation after login', async ({ page }) => {
@@ -70,10 +70,10 @@ test.describe('Home Page', () => {
     await page.waitForURL('/');
 
     // Check authenticated navigation
-    await expect(page.locator('text=New Query')).toBeVisible();
-    await expect(page.locator('text=Workflows')).toBeVisible();
-    await expect(page.locator('text=History')).toBeVisible();
-    await expect(page.locator('text=Sign Out')).toBeVisible();
+    await expect(page.locator('nav a[href="/query"]')).toBeVisible();
+    await expect(page.locator('nav a[href="/workflows"]')).toBeVisible();
+    await expect(page.locator('nav a[href="/history"]')).toBeVisible();
+    await expect(page.locator('button:has-text("Sign Out")')).toBeVisible();
 
     // Check user info is displayed (use environment email)
     const emailPart = testEmail.split('@')[0]; // Get first part of email
