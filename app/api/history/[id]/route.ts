@@ -49,10 +49,10 @@ export async function GET(
     // Get patent results
     const patentsResult = await query(
       `SELECT
-        id, patent_number, title, abstract, filing_date, publication_date,
-        assignee, inventors, url, relevance_score, created_at
+        id, patent_number, title, snippet as abstract, publication_date,
+        assignee, url, relevance_score, created_at
        FROM patent_results
-       WHERE query_id = $1
+       WHERE search_id IN (SELECT id FROM patent_searches WHERE query_id = $1)
        ORDER BY relevance_score DESC NULLS LAST, created_at ASC
        LIMIT 10`,
       [id]
