@@ -125,14 +125,14 @@ export default function IntelligenceAdminPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-800 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-acm-brand-dark via-acm-brand to-acm-blue-light flex items-center justify-center">
         <div className="text-white text-xl">Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-800">
+    <div className="min-h-screen bg-gradient-to-br from-acm-brand-dark via-acm-brand to-acm-blue-light">
       {/* Header */}
       <div className="backdrop-blur-md bg-white/5 border-b border-white/10">
         <div className="max-w-7xl mx-auto px-6 py-6">
@@ -217,7 +217,7 @@ export default function IntelligenceAdminPage() {
             <button
               onClick={triggerWeeklyResearch}
               disabled={researching}
-              className="w-full px-6 py-4 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold rounded-xl shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full px-6 py-4 bg-gradient-to-r from-acm-gold to-acm-gold-light hover:from-acm-gold-light hover:to-acm-gold text-white font-bold rounded-xl shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {researching ? '🔄 Researching... (this may take 2-3 minutes)' : '▶️ Run Weekly Research Now'}
             </button>
@@ -407,7 +407,7 @@ export default function IntelligenceAdminPage() {
               <a
                 href="/COMPETITOR_INTELLIGENCE_SETUP.md"
                 target="_blank"
-                className="inline-flex items-center gap-2 text-purple-400 hover:text-purple-300 font-semibold"
+                className="inline-flex items-center gap-2 text-yellow-300 hover:text-yellow-200 font-semibold"
               >
                 📚 View Full Setup Guide →
               </a>

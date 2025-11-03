@@ -468,15 +468,15 @@ function KnowledgeGraphContent() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <div className="flex items-center justify-center h-screen bg-gradient-to-br from-slate-900 via-acm-brand-dark to-slate-900">
         <div className="text-center">
           {/* Animated loader */}
           <div className="relative mx-auto mb-8 w-20 h-20">
-            <div className="absolute inset-0 rounded-full border-4 border-purple-500/30"></div>
-            <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-purple-500 animate-spin"></div>
+            <div className="absolute inset-0 rounded-full border-4 border-acm-brand/30"></div>
+            <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-acm-brand animate-spin"></div>
             <div className="absolute inset-2 rounded-full border-4 border-transparent border-t-blue-400 animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1s' }}></div>
           </div>
-          <p className="text-xl font-semibold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+          <p className="text-xl font-semibold bg-gradient-to-r from-acm-blue-lighter to-acm-gold-light bg-clip-text text-transparent">
             Loading Knowledge Graph...
           </p>
           <p className="text-sm text-gray-400 mt-2">Visualizing the ACM Biolabs ecosystem</p>
@@ -487,7 +487,7 @@ function KnowledgeGraphContent() {
 
   if (error) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <div className="flex items-center justify-center h-screen bg-gradient-to-br from-slate-900 via-acm-brand-dark to-slate-900">
         <div className="backdrop-blur-xl bg-red-500/10 border border-red-500/30 rounded-2xl p-8 max-w-md shadow-2xl">
           <div className="text-5xl mb-4 text-center">⚠️</div>
           <h3 className="text-red-300 font-bold text-xl mb-3 text-center">Error Loading Knowledge Graph</h3>
@@ -506,9 +506,9 @@ function KnowledgeGraphContent() {
   return (
     <div className="h-screen w-full relative overflow-hidden">
       {/* Animated gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-800">
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-acm-brand-dark to-slate-800">
         {/* Animated orbs */}
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-acm-brand/20 rounded-full blur-3xl animate-pulse"></div>
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
         <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
       </div>
@@ -519,11 +519,11 @@ function KnowledgeGraphContent() {
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center space-x-4">
               {/* Logo/Icon */}
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-2xl shadow-lg">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-acm-brand to-acm-gold flex items-center justify-center text-2xl shadow-lg">
                 🕸️
               </div>
               <div>
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 via-blue-400 to-teal-400 bg-clip-text text-transparent">
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-acm-blue-lighter via-blue-400 to-teal-400 bg-clip-text text-transparent">
                   ACM Biolabs Knowledge Graph
                 </h1>
                 <p className="text-sm text-gray-400 mt-1">
@@ -536,7 +536,7 @@ function KnowledgeGraphContent() {
             <div className="flex items-center space-x-4">
               <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-xl px-6 py-3 shadow-lg hover:bg-white/10 transition-all duration-300 group">
                 <div className="text-xs text-gray-400 mb-1">Total Nodes</div>
-                <div className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent group-hover:scale-110 transition-transform">
+                <div className="text-2xl font-bold bg-gradient-to-r from-acm-blue-lighter to-acm-gold-light bg-clip-text text-transparent group-hover:scale-110 transition-transform">
                   <AnimatedCounter value={ontologyData?.stats.totalNodes || 0} />
                 </div>
               </div>
@@ -565,7 +565,7 @@ function KnowledgeGraphContent() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onFocus={() => searchSuggestions.length > 0 && setShowSuggestions(true)}
-                className="w-full px-5 py-3 pl-12 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300"
+                className="w-full px-5 py-3 pl-12 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-acm-brand/50 focus:border-acm-brand/50 transition-all duration-300"
               />
               <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -594,7 +594,7 @@ function KnowledgeGraphContent() {
                     onClick={() => handleSearchSelect(suggestion)}
                     className="w-full px-5 py-3 text-left text-white hover:bg-white/10 transition-colors flex items-center space-x-3 border-b border-white/5 last:border-b-0"
                   >
-                    <svg className="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 text-acm-blue-lighter" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>
                     <span>{suggestion}</span>
@@ -607,12 +607,12 @@ function KnowledgeGraphContent() {
           {/* Controls Row */}
           <div className="flex items-center justify-between">
             {/* Domain Filter - Only show domains with nodes */}
-            <div className="flex items-center space-x-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-purple-500/50 scrollbar-track-transparent flex-1 mr-4">
+            <div className="flex items-center space-x-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-acm-brand/50 scrollbar-track-transparent flex-1 mr-4">
               <button
                 onClick={() => setSelectedDomain(null)}
                 className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 flex-shrink-0 ${
                   selectedDomain === null
-                    ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg shadow-purple-500/50'
+                    ? 'bg-gradient-to-r from-acm-brand-dark to-acm-brand text-white shadow-lg shadow-acm-brand/50'
                     : 'backdrop-blur-md bg-white/5 border border-white/10 text-gray-300 hover:bg-white/10'
                 }`}
               >
@@ -659,7 +659,7 @@ function KnowledgeGraphContent() {
                     onClick={() => applyLayout(mode)}
                     className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all duration-300 ${
                       layoutMode === mode
-                        ? 'bg-purple-600 text-white'
+                        ? 'bg-acm-brand-dark text-white'
                         : 'text-gray-400 hover:text-white hover:bg-white/5'
                     }`}
                     title={`${mode.charAt(0).toUpperCase() + mode.slice(1)} Layout`}
@@ -692,7 +692,7 @@ function KnowledgeGraphContent() {
         {!selectedDomain && nodes.length === 0 ? (
           <div className="container mx-auto px-8 py-12 pb-20">
             <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent mb-4">
+              <h2 className="text-4xl font-bold bg-gradient-to-r from-acm-blue-lighter to-acm-gold-light bg-clip-text text-transparent mb-4">
                 ACM Research Domains
               </h2>
               <p className="text-gray-400 text-lg">
@@ -794,7 +794,7 @@ function KnowledgeGraphContent() {
           {/* Domain Statistics Panel - Glassmorphism */}
           <Panel position="top-right" className="backdrop-blur-xl bg-slate-900/60 border border-white/10 rounded-2xl shadow-2xl p-6 m-4 max-w-sm">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-bold text-lg bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+              <h3 className="font-bold text-lg bg-gradient-to-r from-acm-blue-lighter to-acm-gold-light bg-clip-text text-transparent">
                 Domain Statistics
               </h3>
               <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse shadow-lg shadow-green-400/50"></div>
@@ -818,7 +818,7 @@ function KnowledgeGraphContent() {
                     <span className="text-gray-200 font-medium">{domain.name}</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <span className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+                    <span className="text-2xl font-bold bg-gradient-to-r from-acm-blue-lighter to-acm-gold-light bg-clip-text text-transparent">
                       {count}
                     </span>
                   </div>
@@ -911,7 +911,7 @@ function KnowledgeGraphContent() {
                 <div className="space-y-3">
                   {Object.entries(selectedNode.metadata).map(([key, value]) => (
                     <div key={key} className="flex items-start space-x-2">
-                      <div className="w-2 h-2 rounded-full bg-purple-400 mt-1.5 flex-shrink-0"></div>
+                      <div className="w-2 h-2 rounded-full bg-acm-blue-lighter mt-1.5 flex-shrink-0"></div>
                       <div className="flex-1">
                         <span className="text-xs text-gray-400 font-semibold uppercase tracking-wide">
                           {key.replace(/_/g, ' ')}
@@ -928,7 +928,7 @@ function KnowledgeGraphContent() {
 
             {/* Action Buttons */}
             <div className="flex items-center space-x-2">
-              <button className="flex-1 px-4 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl hover:from-purple-500 hover:to-blue-500 transition-all duration-300 font-semibold shadow-lg hover:shadow-purple-500/50">
+              <button className="flex-1 px-4 py-3 bg-gradient-to-r from-acm-brand-dark to-acm-brand text-white rounded-xl hover:from-acm-brand hover:to-blue-500 transition-all duration-300 font-semibold shadow-lg hover:shadow-acm-brand/50">
                 View Details
               </button>
               <button
@@ -966,7 +966,7 @@ function KnowledgeGraphContent() {
         .scrollbar-thin::-webkit-scrollbar {
           height: 6px;
         }
-        .scrollbar-thumb-purple-500\/50::-webkit-scrollbar-thumb {
+        .scrollbar-thumb-acm-brand\/50::-webkit-scrollbar-thumb {
           background: rgba(139, 92, 246, 0.5);
           border-radius: 3px;
         }
