@@ -123,7 +123,7 @@ export default function Navigation() {
                         <div className="py-1">
                           <Link
                             href="/admin/migrate"
-                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-acm-gold"
+                            className="block px-4 py-2 text-sm text-black hover:bg-amber-50 hover:text-acm-gold"
                             onClick={() => setIsAdminOpen(false)}
                           >
                             <span className="flex items-center">
@@ -133,7 +133,7 @@ export default function Navigation() {
                           </Link>
                           <Link
                             href="/admin/intelligence"
-                            className="block px-4 py-2 text-sm text-gray-900 hover:bg-amber-50 hover:text-acm-gold"
+                            className="block px-4 py-2 text-sm text-black hover:bg-amber-50 hover:text-acm-gold"
                             onClick={() => setIsAdminOpen(false)}
                           >
                             <span className="flex items-center">
