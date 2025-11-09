@@ -6,6 +6,7 @@ import { ContextLevelSelector } from '@/components/ContextLevelSelector';
 import { DataSourceSelector } from '@/components/DataSourceSelector';
 import { CostEstimator } from '@/components/CostEstimator';
 import PatentCard from '@/components/PatentCard';
+import OpenAlexCard from '@/components/OpenAlexCard';
 import FollowUpQuestions from '@/components/FollowUpQuestions';
 
 interface LLMResponse {
@@ -53,6 +54,10 @@ function QueryPageContent() {
   // Patent state
   const [patents, setPatents] = useState<any[]>([]);
   const [patentCount, setPatentCount] = useState(0);
+
+  // OpenAlex state
+  const [openAlexResults, setOpenAlexResults] = useState<any[]>([]);
+  const [openAlexCount, setOpenAlexCount] = useState(0);
 
   useEffect(() => {
     fetchWorkflows();
@@ -106,6 +111,8 @@ function QueryPageContent() {
       setCached(data.cached || false);
       setPatents(data.patents || []);
       setPatentCount(data.patent_count || 0);
+      setOpenAlexResults(data.openalex || []);
+      setOpenAlexCount(data.openalex_count || 0);
 
       // Generate summary after responses are received
       if (data.responses && data.responses.length > 0) {
@@ -682,6 +689,48 @@ function QueryPageContent() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               Patent data is automatically fetched from Google Patents and provided as context to all LLM models for IP-aware analysis.
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* OpenAlex Academic Literature Section */}
+      {!loading && openAlexResults.length > 0 && (
+        <div className="section-container mb-8">
+          <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
+            <div className="flex items-center">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-accent-blue to-accent-cyan flex items-center justify-center mr-4 shadow-md">
+                <span className="text-white text-2xl">📚</span>
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-dark-text">
+                  Academic Literature
+                </h3>
+                <p className="text-sm text-dark-text-muted mt-1">
+                  Peer-reviewed research from OpenAlex • {openAlexCount} results
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="badge badge-primary">
+                <span className="font-bold">{openAlexCount}</span>
+                <span className="ml-1">papers analyzed by all 4 LLMs</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="compact-grid">
+            {openAlexResults.map((work, index) => (
+              <OpenAlexCard key={work.id || index} work={work} />
+            ))}
+          </div>
+
+          <div className="mt-6 pt-5 border-t border-dark-border">
+            <div className="flex items-center text-xs text-dark-text-muted">
+              <svg className="w-4 h-4 mr-2 text-accent-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Academic papers are automatically fetched from OpenAlex (250M+ research works) and provided as context to all LLM models for evidence-based analysis.
             </div>
           </div>
         </div>
