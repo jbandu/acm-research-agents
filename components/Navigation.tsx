@@ -68,9 +68,8 @@ export default function Navigation() {
           </div>
 
           {/* Navigation Links */}
-          {status === 'authenticated' && (
-            <nav className="flex-1 overflow-y-auto py-4">
-              <div className="space-y-1 px-3">
+          <nav className="flex-1 overflow-y-auto py-4">
+            <div className="space-y-1 px-3">
                 <Link
                   href="/query"
                   className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
@@ -187,8 +186,8 @@ export default function Navigation() {
                   </div>
                 )}
               </div>
-            </nav>
-          )}
+            </div>
+          </nav>
 
           {/* User Section at Bottom */}
           <div className="border-t border-gray-200 p-4">
