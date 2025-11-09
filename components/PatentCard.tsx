@@ -17,11 +17,11 @@ interface PatentCardProps {
 
 export default function PatentCard({ patent }: PatentCardProps) {
   const getRelevanceColor = (score?: number) => {
-    if (!score) return 'bg-gray-100 text-gray-800';
-    if (score >= 80) return 'bg-green-100 text-green-800';
-    if (score >= 60) return 'bg-blue-100 text-blue-800';
-    if (score >= 40) return 'bg-yellow-100 text-yellow-800';
-    return 'bg-gray-100 text-gray-800';
+    if (!score) return 'bg-dark-elevated text-dark-text-muted border border-dark-border';
+    if (score >= 80) return 'bg-accent-green/10 text-accent-green border border-accent-green/30';
+    if (score >= 60) return 'bg-accent-blue/10 text-accent-blue border border-accent-blue/30';
+    if (score >= 40) return 'bg-accent-yellow/10 text-accent-yellow border border-accent-yellow/30';
+    return 'bg-dark-elevated text-dark-text-muted border border-dark-border';
   };
 
   const formatDate = (dateStr: string) => {
@@ -38,12 +38,12 @@ export default function PatentCard({ patent }: PatentCardProps) {
   };
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-5 hover:shadow-lg hover:border-purple-300 transition-all duration-200 group">
+    <div className="bg-dark-surface border border-dark-border rounded-lg p-5 hover:shadow-lg hover:border-accent-purple/50 transition-all duration-200 group">
       {/* Header */}
       <div className="flex justify-between items-start mb-3">
         <div className="flex-1">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs font-mono font-bold text-purple-700 bg-purple-50 px-2 py-1 rounded">
+          <div className="flex items-center gap-2 mb-1 flex-wrap">
+            <span className="text-xs font-mono font-bold text-accent-purple bg-accent-purple/10 px-2 py-1 rounded border border-accent-purple/30">
               {patent.patentNumber}
             </span>
             {patent.relevanceScore !== undefined && (
@@ -52,25 +52,25 @@ export default function PatentCard({ patent }: PatentCardProps) {
               </span>
             )}
           </div>
-          <div className="text-sm text-gray-600 font-medium">
+          <div className="text-sm text-dark-text-muted font-medium">
             {patent.assignee}
           </div>
         </div>
       </div>
 
       {/* Title */}
-      <h3 className="font-semibold text-gray-900 mb-2 leading-snug group-hover:text-purple-700 transition-colors">
+      <h3 className="font-semibold text-dark-text mb-2 leading-snug group-hover:text-accent-purple transition-colors">
         {patent.title}
       </h3>
 
       {/* Snippet */}
-      <p className="text-sm text-gray-600 leading-relaxed mb-4 line-clamp-3">
+      <p className="text-sm text-dark-text-muted leading-relaxed mb-4 line-clamp-3">
         {patent.snippet}
       </p>
 
       {/* Footer */}
-      <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-        <div className="text-xs text-gray-500">
+      <div className="flex items-center justify-between pt-3 border-t border-dark-border">
+        <div className="text-xs text-dark-text-subtle">
           📅 {formatDate(patent.publicationDate)}
         </div>
         <div className="flex gap-2">
@@ -78,7 +78,7 @@ export default function PatentCard({ patent }: PatentCardProps) {
             href={patent.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs font-medium px-3 py-1.5 bg-purple-600 text-white rounded hover:bg-purple-700 transition-colors flex items-center gap-1"
+            className="text-xs font-medium px-3 py-1.5 bg-gradient-to-br from-accent-purple to-accent-purple/80 text-white rounded hover:from-accent-purple/90 hover:to-accent-purple/70 transition-all flex items-center gap-1 shadow-sm"
           >
             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -90,7 +90,7 @@ export default function PatentCard({ patent }: PatentCardProps) {
               href={patent.pdfUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-xs font-medium px-3 py-1.5 bg-white border border-gray-300 text-gray-700 rounded hover:bg-gray-50 transition-colors flex items-center gap-1"
+              className="text-xs font-medium px-3 py-1.5 bg-dark-elevated border border-dark-border text-dark-text rounded hover:bg-dark-surface transition-colors flex items-center gap-1"
             >
               <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />

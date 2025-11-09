@@ -486,23 +486,71 @@ function QueryPageContent() {
 
       {/* Loading State */}
       {loading && (
-        <div className="response-grid mb-8">
-          {['claude', 'openai', 'gemini', 'grok', 'ollama', 'patents'].map((provider) => (
-            <div key={provider} className={getLLMCardClass(provider)}>
-              <div className="flex items-center mb-4">
-                <div className={`w-3 h-3 rounded-full ${getLLMBgColor(provider)} mr-3 animate-pulse`}></div>
-                <h3 className={`text-lg font-bold ${getLLMColor(provider)} capitalize`}>
-                  {provider === 'ollama' ? 'Llama 3.1 (Local)' : provider === 'patents' ? 'Google Patents' : provider} - Processing...
-                </h3>
+        <>
+          {/* LLM Processing */}
+          <div className="mb-6">
+            <h2 className="text-lg font-semibold text-dark-text mb-4 flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-accent-blue animate-pulse"></div>
+              Querying AI Models...
+            </h2>
+            <div className="response-grid mb-4">
+              {['claude', 'openai', 'gemini', 'grok'].map((provider) => (
+                <div key={provider} className={getLLMCardClass(provider)}>
+                  <div className="flex items-center mb-4">
+                    <div className={`w-3 h-3 rounded-full ${getLLMBgColor(provider)} mr-3 animate-pulse`}></div>
+                    <h3 className={`text-base font-bold ${getLLMColor(provider)} capitalize`}>
+                      {provider} - Processing...
+                    </h3>
+                  </div>
+                  <div className="animate-pulse space-y-3">
+                    <div className="h-4 bg-dark-elevated rounded"></div>
+                    <div className="h-4 bg-dark-elevated rounded"></div>
+                    <div className="h-4 bg-dark-elevated rounded w-3/4"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Data Sources Processing */}
+          <div className="mb-6">
+            <h2 className="text-lg font-semibold text-dark-text mb-4 flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-accent-cyan animate-pulse"></div>
+              Fetching Research Data...
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Patents Loading */}
+              <div className="bg-dark-surface border border-dark-border rounded-lg p-5">
+                <div className="flex items-center mb-3">
+                  <div className="w-3 h-3 rounded-full bg-accent-yellow mr-3 animate-pulse"></div>
+                  <h3 className="text-base font-bold text-accent-yellow">
+                    Google Patents - Searching...
+                  </h3>
+                </div>
+                <div className="animate-pulse space-y-2">
+                  <div className="h-3 bg-dark-elevated rounded"></div>
+                  <div className="h-3 bg-dark-elevated rounded w-5/6"></div>
+                  <div className="h-3 bg-dark-elevated rounded w-4/6"></div>
+                </div>
               </div>
-              <div className="animate-pulse space-y-3">
-                <div className="h-4 bg-gray-200 rounded"></div>
-                <div className="h-4 bg-gray-200 rounded"></div>
-                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+
+              {/* OpenAlex Loading */}
+              <div className="bg-dark-surface border border-dark-border rounded-lg p-5">
+                <div className="flex items-center mb-3">
+                  <div className="w-3 h-3 rounded-full bg-accent-blue mr-3 animate-pulse"></div>
+                  <h3 className="text-base font-bold text-accent-blue">
+                    OpenAlex - Searching...
+                  </h3>
+                </div>
+                <div className="animate-pulse space-y-2">
+                  <div className="h-3 bg-dark-elevated rounded"></div>
+                  <div className="h-3 bg-dark-elevated rounded w-5/6"></div>
+                  <div className="h-3 bg-dark-elevated rounded w-4/6"></div>
+                </div>
               </div>
             </div>
-          ))}
-        </div>
+          </div>
+        </>
       )}
 
       {/* LLM Responses Grid */}
