@@ -4,6 +4,21 @@
 @import "tailwindcss";
 
 @theme {
+  /* ACM Brand Colors */
+  --color-acm-brand: #376092;
+  --color-acm-brand-dark: #31547a;
+  --color-acm-gold: #d19124;
+  --color-acm-gold-light: #e8a534;
+  --color-acm-yellow: #f2cf00;
+  --color-acm-gray: #757474;
+  --color-acm-gray-light: #e8e8e8;
+  --color-acm-gray-lighter: #f4f4f4;
+  --color-acm-gray-lightest: #fafafa;
+  --color-acm-text-default: #2b2b2b;
+  --color-acm-blue-light: #6d8a9b;
+  --color-acm-blue-lighter: #82a0b1;
+  --color-acm-blue-lightest: #a0b3be;
+
   /* LLM-specific colors - these extend the config */
   --color-claude: #4F46E5;
   --color-claude-light: #6366F1;
