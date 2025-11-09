@@ -186,7 +186,6 @@ export default function Navigation() {
                   </div>
                 )}
               </div>
-            </div>
           </nav>
 
           {/* User Section at Bottom */}
