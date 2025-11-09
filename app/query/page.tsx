@@ -639,19 +639,6 @@ function QueryPageContent() {
         </div>
       )}
 
-      {/* Follow-Up Questions Section */}
-      {!loading && followupQuestions.length > 0 && (
-        <div className="mb-8">
-          <FollowUpQuestions
-            questions={followupQuestions}
-            originalQueryId={queryId}
-            onQuestionClick={(question) => {
-              setQueryText(question.question);
-            }}
-          />
-        </div>
-      )}
-
       {/* Patent Intelligence Section */}
       {!loading && patents.length > 0 && (
         <div className="section-container mb-8">
@@ -733,6 +720,19 @@ function QueryPageContent() {
               Academic papers are automatically fetched from OpenAlex (250M+ research works) and provided as context to all LLM models for evidence-based analysis.
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Follow-Up Questions Section */}
+      {!loading && followupQuestions.length > 0 && (
+        <div className="mb-8">
+          <FollowUpQuestions
+            questions={followupQuestions}
+            originalQueryId={queryId}
+            onQuestionClick={(question) => {
+              setQueryText(question.question);
+            }}
+          />
         </div>
       )}
 
