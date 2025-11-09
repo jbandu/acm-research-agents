@@ -1,17 +1,12 @@
-import { withAuth } from 'next-auth/middleware';
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
-export default withAuth({
-  pages: {
-    signIn: '/auth/signin',
-  },
-});
+// Authentication disabled - all routes are publicly accessible
+export function middleware(request: NextRequest) {
+  return NextResponse.next();
+}
 
+// No routes are protected - middleware passes through all requests
 export const config = {
-  matcher: [
-    '/query/:path*',
-    '/workflows/:path*',
-    '/history/:path*',
-    '/api/query/:path*',
-    // Note: /api/workflows and /api/history are publicly accessible for the home page
-  ],
+  matcher: [],
 };

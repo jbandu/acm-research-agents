@@ -27,14 +27,9 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Only fetch data if user is authenticated
-    if (status === 'authenticated') {
-      fetchData();
-    } else if (status === 'unauthenticated') {
-      setLoading(false);
-    }
-    // If status is 'loading', keep loading state true
-  }, [status]);
+    // Fetch data regardless of authentication status
+    fetchData();
+  }, []);
 
   const fetchData = async () => {
     try {

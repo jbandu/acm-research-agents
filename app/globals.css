@@ -1,35 +1,40 @@
 /* Import professional fonts */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
 @import "tailwindcss";
 
 @theme {
-  /* ACM Brand Colors */
-  --color-acm-brand: #376092;
-  --color-acm-brand-dark: #31547a;
-  --color-acm-gold: #d19124;
-  --color-acm-gold-light: #e8a534;
-  --color-acm-yellow: #f2cf00;
-  --color-acm-gray: #757474;
-  --color-acm-gray-light: #e8e8e8;
-  --color-acm-gray-lighter: #f4f4f4;
-  --color-acm-gray-lightest: #fafafa;
-  --color-acm-text-default: #2b2b2b;
-  --color-acm-blue-light: #6d8a9b;
-  --color-acm-blue-lighter: #82a0b1;
-  --color-acm-blue-lightest: #a0b3be;
+  /* Palantir-style Dark Theme Colors */
+  --color-dark-bg: #0a0e27;
+  --color-dark-surface: #0f1629;
+  --color-dark-elevated: #151b30;
+  --color-dark-border: #1e2742;
+  --color-dark-border-light: #2a3551;
+  --color-dark-text: #e4e7eb;
+  --color-dark-text-muted: #8b92a7;
+  --color-dark-text-subtle: #5f6780;
 
-  /* LLM-specific colors - these extend the config */
-  --color-claude: #4F46E5;
-  --color-claude-light: #6366F1;
+  /* Palantir Accent Colors */
+  --color-accent-blue: #4a9eff;
+  --color-accent-blue-dim: #2e5f99;
+  --color-accent-cyan: #00d4ff;
+  --color-accent-purple: #a78bfa;
+  --color-accent-green: #10b981;
+  --color-accent-yellow: #fbbf24;
+  --color-accent-red: #ef4444;
+  --color-accent-orange: #f97316;
+
+  /* LLM-specific colors - adjusted for dark theme */
+  --color-claude: #6366F1;
+  --color-claude-light: #818CF8;
   --color-openai: #10A37F;
-  --color-openai-light: #1A9675;
-  --color-gemini: #DC2626;
-  --color-gemini-light: #EF4444;
-  --color-grok: #8B5CF6;
-  --color-grok-light: #A78BFA;
+  --color-openai-light: #14B48C;
+  --color-gemini: #EF4444;
+  --color-gemini-light: #F87171;
+  --color-grok: #A78BFA;
+  --color-grok-light: #C4B5FD;
 
-  /* Professional spacing scale for biotech UI */
+  /* Professional spacing scale */
   --spacing-xs: 0.25rem;
   --spacing-sm: 0.5rem;
   --spacing-md: 1rem;
@@ -49,12 +54,12 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: #0a0e27;
+    --foreground: #e4e7eb;
   }
 
   body {
-    @apply bg-gray-50 text-gray-900;
+    @apply bg-dark-bg text-dark-text;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     font-feature-settings: 'cv11', 'ss01';
     -webkit-font-smoothing: antialiased;
@@ -77,92 +82,78 @@
 }
 
 @layer components {
-  /* Enhanced LLM Cards with better visual hierarchy */
+  /* Palantir-style LLM Cards */
   .llm-card {
-    @apply rounded-xl border-2 p-6 bg-white shadow-lg hover:shadow-xl transition-all duration-300;
-    @apply hover:translate-y-[-2px];
+    @apply rounded-lg border border-dark-border p-6 bg-dark-surface shadow-lg hover:shadow-2xl transition-all duration-300;
+    @apply hover:border-dark-border-light hover:translate-y-[-1px];
   }
 
   .llm-card-claude {
-    @apply border-claude bg-gradient-to-br from-white to-claude/5;
+    @apply border-claude/30 bg-gradient-to-br from-dark-surface to-claude/5;
   }
 
   .llm-card-openai {
-    @apply border-openai bg-gradient-to-br from-white to-openai/5;
+    @apply border-openai/30 bg-gradient-to-br from-dark-surface to-openai/5;
   }
 
   .llm-card-gemini {
-    @apply border-gemini bg-gradient-to-br from-white to-gemini/5;
+    @apply border-gemini/30 bg-gradient-to-br from-dark-surface to-gemini/5;
   }
 
   .llm-card-grok {
-    @apply border-grok bg-gradient-to-br from-white to-grok/5;
+    @apply border-grok/30 bg-gradient-to-br from-dark-surface to-grok/5;
   }
 
   .llm-card-ollama {
-    @apply border-indigo-500 bg-gradient-to-br from-white to-indigo-500/5;
+    @apply border-accent-purple/30 bg-gradient-to-br from-dark-surface to-accent-purple/5;
   }
 
   .llm-card-patents {
-    @apply border-amber-500 bg-gradient-to-br from-white to-amber-500/5;
+    @apply border-accent-yellow/30 bg-gradient-to-br from-dark-surface to-accent-yellow/5;
   }
 
-  /* ACM-styled buttons */
+  /* Palantir-style buttons */
   .btn-primary {
-    @apply px-6 py-3 rounded-lg font-semibold transition-all duration-200;
-    @apply text-white shadow-md hover:shadow-lg;
-    @apply focus:outline-none focus:ring-2 focus:ring-offset-2;
-    background: linear-gradient(to right, #376092, #31547a);
+    @apply px-6 py-3 rounded-md font-semibold transition-all duration-200;
+    @apply text-white shadow-sm hover:shadow-md;
+    @apply focus:outline-none focus:ring-2 focus:ring-accent-blue/50;
+    @apply border border-accent-blue/30;
+    background: linear-gradient(to bottom, #4a9eff, #2e5f99);
   }
 
   .btn-primary:hover {
-    background: linear-gradient(to right, #31547a, #376092);
-  }
-
-  .btn-primary:focus {
-    --tw-ring-color: #376092;
+    background: linear-gradient(to bottom, #5aafff, #3e6fa9);
+    @apply border-accent-blue/50;
   }
 
   .btn-secondary {
-    @apply px-6 py-3 rounded-lg font-semibold transition-all duration-200;
-    @apply bg-white shadow-sm hover:shadow-md;
-    @apply focus:outline-none focus:ring-2 focus:ring-offset-2;
-    color: #376092;
-    border: 2px solid #376092;
-  }
-
-  .btn-secondary:hover {
-    background: #376092;
-    color: white;
-  }
-
-  .btn-secondary:focus {
-    --tw-ring-color: #376092;
+    @apply px-6 py-3 rounded-md font-semibold transition-all duration-200;
+    @apply bg-dark-elevated shadow-sm hover:shadow-md;
+    @apply focus:outline-none focus:ring-2 focus:ring-accent-blue/50;
+    @apply text-dark-text;
+    @apply border border-dark-border hover:border-dark-border-light;
   }
 
   .btn-accent {
-    @apply px-6 py-3 rounded-lg font-semibold transition-all duration-200;
-    @apply text-white shadow-md hover:shadow-lg;
-    @apply focus:outline-none focus:ring-2 focus:ring-offset-2;
-    background: linear-gradient(to right, #d19124, #e8a534);
+    @apply px-6 py-3 rounded-md font-semibold transition-all duration-200;
+    @apply text-dark-bg shadow-sm hover:shadow-md;
+    @apply focus:outline-none focus:ring-2 focus:ring-accent-cyan/50;
+    @apply border border-accent-cyan/30;
+    background: linear-gradient(to bottom, #00d4ff, #00a3cc);
   }
 
   .btn-accent:hover {
-    background: linear-gradient(to right, #e8a534, #d19124);
+    background: linear-gradient(to bottom, #1adeff, #00b3dc);
   }
 
-  .btn-accent:focus {
-    --tw-ring-color: #d19124;
-  }
-
-  /* Data visualization components */
+  /* Palantir-style data visualization components */
   .stat-card {
-    @apply bg-white rounded-xl border border-gray-200 p-6 shadow-sm;
-    @apply hover:shadow-md transition-shadow duration-200;
+    @apply bg-dark-surface rounded-lg border border-dark-border p-6 shadow-sm;
+    @apply hover:border-dark-border-light hover:shadow-md transition-all duration-200;
   }
 
   .confidence-bar {
-    @apply w-full h-3 rounded-full bg-gray-100 overflow-hidden;
+    @apply w-full h-2 rounded-full bg-dark-bg overflow-hidden;
   }
 
   .confidence-fill {
@@ -171,41 +162,37 @@
 
   /* Section containers */
   .section-container {
-    @apply bg-white rounded-xl border border-gray-200 p-6 md:p-8 shadow-sm;
+    @apply bg-dark-surface rounded-lg border border-dark-border p-6 md:p-8 shadow-sm;
   }
 
   .section-header {
-    @apply flex items-center justify-between mb-6 pb-4 border-b border-gray-200;
+    @apply flex items-center justify-between mb-6 pb-4 border-b border-dark-border;
   }
 
-  /* ACM-branded info panels */
+  /* Palantir-style info panels */
   .info-panel {
-    @apply rounded-xl p-6;
-    background: linear-gradient(to bottom right, rgba(55, 96, 146, 0.05), rgba(109, 138, 155, 0.05));
-    border: 2px solid rgba(55, 96, 146, 0.2);
+    @apply rounded-lg p-6 bg-dark-elevated border border-dark-border;
   }
 
   /* Professional tag/badge styles */
   .badge {
-    @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium;
+    @apply inline-flex items-center px-3 py-1 rounded-md text-xs font-medium uppercase tracking-wide;
   }
 
-  .badge-acm {
-    background: rgba(55, 96, 146, 0.1);
-    color: #376092;
-    border: 1px solid rgba(55, 96, 146, 0.2);
+  .badge-primary {
+    @apply bg-accent-blue/10 text-accent-blue border border-accent-blue/30;
   }
 
   .badge-success {
-    @apply bg-green-100 text-green-800 border border-green-200;
+    @apply bg-accent-green/10 text-accent-green border border-accent-green/30;
   }
 
   .badge-warning {
-    @apply bg-yellow-100 text-yellow-800 border border-yellow-200;
+    @apply bg-accent-yellow/10 text-accent-yellow border border-accent-yellow/30;
   }
 
   .badge-error {
-    @apply bg-red-100 text-red-800 border border-red-200;
+    @apply bg-accent-red/10 text-accent-red border border-accent-red/30;
   }
 
   /* Responsive grid layouts */
