@@ -3,6 +3,7 @@ import { queryAllLLMs, LLMResponse } from '@/lib/llm-clients';
 import { query } from '@/lib/db';
 import { requireAuth } from '@/lib/session';
 import { searchGooglePatents, createPatentContext, PatentResult } from '@/lib/google-patents';
+import { searchWorks, OpenAlexWork, SearchFilters, createOpenAlexContext } from '@/lib/openalex';
 
 export async function POST(request: NextRequest) {
   try {
@@ -134,11 +135,84 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Create patent context for LLM prompts
-    const patentContext = createPatentContext(patentResults);
-    const enhancedQueryText = patentContext ? query_text + patentContext : query_text;
+    // Check if OpenAlex search is enabled
+    let openAlexResults: OpenAlexWork[] = [];
+    let openAlexSearchId: string | null = null;
+    try {
+      const openAlexSettingsCheck = await query(`
+        SELECT enabled
+        FROM provider_settings
+        WHERE provider_key = 'openalex' AND provider_type = 'search'
+      `);
 
-    // Query all LLMs in parallel (with patent context)
+      const openAlexEnabled = openAlexSettingsCheck.rows.length > 0 ? openAlexSettingsCheck.rows[0].enabled : true;
+
+      if (openAlexEnabled) {
+        console.log('Searching OpenAlex...');
+        const filters: SearchFilters = {
+          from_publication_date: '2015-01-01', // Last ~10 years for relevance
+        };
+        const openAlexResult = await searchWorks(query_text, 10, filters);
+        openAlexResults = openAlexResult.results;
+        console.log(`Found ${openAlexResults.length} academic papers from OpenAlex`);
+
+        // Save OpenAlex search to database (gracefully handle missing tables)
+        if (openAlexResults.length > 0) {
+          try {
+            const openAlexSearchResult = await query(
+              'INSERT INTO openalex_searches (query_id, search_query, results_count) VALUES ($1, $2, $3) RETURNING id',
+              [queryId, query_text, openAlexResults.length]
+            );
+            openAlexSearchId = openAlexSearchResult.rows[0].id;
+
+            // Save individual OpenAlex results
+            for (const work of openAlexResults) {
+              await query(
+                `INSERT INTO openalex_results
+                 (search_id, work_id, doi, title, publication_date, cited_by_count, is_open_access, abstract, authors, concepts, pdf_url)
+                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+                 ON CONFLICT (search_id, work_id) DO NOTHING`,
+                [
+                  openAlexSearchId,
+                  work.id,
+                  work.doi || null,
+                  work.title,
+                  work.publication_date,
+                  work.cited_by_count,
+                  work.open_access?.is_oa || false,
+                  work.abstract_inverted_index ? JSON.stringify(work.abstract_inverted_index) : null,
+                  JSON.stringify(work.authorships.map(a => a.author.display_name)),
+                  JSON.stringify(work.concepts.map(c => ({ name: c.display_name, score: c.score }))),
+                  work.primary_location?.pdf_url || work.open_access?.oa_url || null,
+                ]
+              );
+            }
+          } catch (openAlexDbError: any) {
+            console.warn('OpenAlex tables not available (run migration 010):', openAlexDbError.message);
+            // Results will still be returned in API response, just not saved to DB
+          }
+        }
+      } else {
+        console.log('OpenAlex search disabled in settings');
+      }
+    } catch (error: any) {
+      // If table doesn't exist yet, default to enabled
+      console.log('Provider settings not available for OpenAlex, defaulting to enabled');
+      const filters: SearchFilters = {
+        from_publication_date: '2015-01-01',
+      };
+      const openAlexResult = await searchWorks(query_text, 10, filters);
+      openAlexResults = openAlexResult.results;
+    }
+
+    // Create combined context for LLM prompts (patents + academic papers)
+    const patentContext = createPatentContext(patentResults);
+    const openAlexContext = createOpenAlexContext(openAlexResults);
+    let enhancedQueryText = query_text;
+    if (patentContext) enhancedQueryText += patentContext;
+    if (openAlexContext) enhancedQueryText += openAlexContext;
+
+    // Query all LLMs in parallel (with patent and OpenAlex context)
     const llmResponses = await queryAllLLMs({
       queryText: enhancedQueryText,
       systemPrompt: systemPromptToUse,
@@ -181,6 +255,8 @@ export async function POST(request: NextRequest) {
       consensus,
       patents: patentResults, // Include patent results
       patent_count: patentResults.length,
+      openalex: openAlexResults, // Include OpenAlex results
+      openalex_count: openAlexResults.length,
     });
   } catch (error: any) {
     console.error('Query API error:', error);
