@@ -342,18 +342,18 @@ function QueryPageContent() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">New Research Query</h1>
+      <h1 className="text-3xl font-bold text-white mb-8">New Research Query</h1>
 
       {/* Input Section */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6 mb-8">
+      <div className="bg-dark-surface rounded-lg border border-dark-border p-6 mb-8">
         <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-semibold text-dark-text mb-2">
             Select Workflow (Optional)
           </label>
           <select
             value={selectedWorkflow}
             onChange={(e) => setSelectedWorkflow(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-4 py-2 bg-dark-elevated border border-dark-border text-dark-text rounded-lg focus:ring-2 focus:ring-accent-blue focus:border-accent-blue transition-all"
           >
             <option value="">-- No workflow (generic query) --</option>
             {workflows.map((workflow) => (
@@ -365,14 +365,14 @@ function QueryPageContent() {
         </div>
 
         <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-semibold text-dark-text mb-2">
             Research Query
           </label>
           <textarea
             value={queryText}
             onChange={(e) => setQueryText(e.target.value)}
             rows={6}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-4 py-3 bg-dark-elevated border border-dark-border text-dark-text rounded-lg focus:ring-2 focus:ring-accent-blue focus:border-accent-blue transition-all placeholder:text-dark-text-subtle"
             placeholder="Enter your research question here. Example: What is the optimal dosing schedule for combining TLR9 agonists with checkpoint inhibitors in bladder cancer?"
           />
         </div>
@@ -382,7 +382,7 @@ function QueryPageContent() {
           <button
             type="button"
             onClick={() => setShowAdvanced(!showAdvanced)}
-            className="text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center gap-2"
+            className="text-sm text-accent-blue hover:text-accent-cyan font-medium flex items-center gap-2 transition-colors"
           >
             {showAdvanced ? '▼' : '▶'} Advanced Options (Context, Data Sources, Cost Estimate)
           </button>
@@ -390,7 +390,7 @@ function QueryPageContent() {
 
         {/* Advanced Options Panel */}
         {showAdvanced && (
-          <div className="space-y-6 mb-6 p-6 bg-gray-50 rounded-lg border border-gray-200">
+          <div className="space-y-6 mb-6 p-6 bg-dark-elevated rounded-lg border border-dark-border">
             {/* Context Level Selector */}
             <div>
               <ContextLevelSelector
@@ -440,31 +440,43 @@ function QueryPageContent() {
 
       {/* Consensus Indicator */}
       {consensus && !loading && (
-        <div className={`mb-8 p-4 rounded-lg ${
+        <div className={`mb-8 p-5 rounded-lg border-l-4 ${
           consensus.hasConsensus
             ? consensus.consensusLevel === 'high'
-              ? 'bg-green-50 border border-green-200'
-              : 'bg-yellow-50 border border-yellow-200'
-            : 'bg-orange-50 border border-orange-200'
+              ? 'bg-accent-green/10 border-accent-green'
+              : 'bg-accent-yellow/10 border-accent-yellow'
+            : 'bg-accent-orange/10 border-accent-orange'
         }`}>
-          <div className="flex items-center">
-            <span className="text-2xl mr-3">
+          <div className="flex items-start gap-3">
+            <span className="text-2xl flex-shrink-0">
               {consensus.hasConsensus ? '✅' : '⚠️'}
             </span>
-            <div>
-              <h3 className="font-semibold text-gray-900">
+            <div className="flex-1">
+              <h3 className={`font-semibold text-lg mb-1 ${
+                consensus.hasConsensus
+                  ? consensus.consensusLevel === 'high'
+                    ? 'text-accent-green'
+                    : 'text-accent-yellow'
+                  : 'text-accent-orange'
+              }`}>
                 {consensus.hasConsensus
                   ? `${consensus.consensusLevel === 'high' ? 'High' : 'Medium'} Consensus Detected`
                   : 'Conflict Detected - Human Review Required'}
               </h3>
-              <p className="text-sm text-gray-600">
+              <p className={`text-sm ${
+                consensus.hasConsensus
+                  ? consensus.consensusLevel === 'high'
+                    ? 'text-accent-green/80'
+                    : 'text-accent-yellow/80'
+                  : 'text-accent-orange/80'
+              }`}>
                 {consensus.hasConsensus
                   ? 'All LLMs agree on the core analysis'
-                  : `Conflicting responses from: ${consensus.conflictingProviders.join(', ')}`}
+                  : `Conflicting responses detected. Manual review recommended for: ${consensus.conflictingProviders.join(', ')}`}
               </p>
               {cached && (
-                <p className="text-sm text-blue-600 mt-1">
-                  ⚡ Cached result from previous query (saved API costs)
+                <p className="text-sm text-accent-cyan mt-2 flex items-center gap-1">
+                  <span>⚡</span> Cached result from previous query (saved API costs)
                 </p>
               )}
             </div>
@@ -500,13 +512,19 @@ function QueryPageContent() {
             <div key={index} className={getLLMCardClass(response.provider)}>
               {/* Header */}
               <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <div className={`w-2 h-2 rounded-full ${getLLMBgColor(response.provider)}`}></div>
-                  <h3 className={`text-lg font-bold ${getLLMColor(response.provider)} capitalize`}>
-                    {response.provider}
-                  </h3>
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-lg ${getLLMBgColor(response.provider)} flex items-center justify-center shadow-md`}>
+                    <span className="text-white font-bold text-sm uppercase">
+                      {response.provider.charAt(0)}
+                    </span>
+                  </div>
+                  <div>
+                    <h3 className={`text-base font-bold ${getLLMColor(response.provider)} capitalize`}>
+                      {response.provider}
+                    </h3>
+                    <span className="text-xs text-dark-text-muted font-mono">{response.model}</span>
+                  </div>
                 </div>
-                <span className="text-xs text-gray-500 font-mono">{response.model}</span>
               </div>
 
               {/* Response Text */}
@@ -516,20 +534,20 @@ function QueryPageContent() {
                 </div>
               ) : (
                 <div className="prose prose-sm max-w-none mb-5">
-                  <p className="whitespace-pre-wrap text-gray-800 leading-relaxed">
+                  <div className="whitespace-pre-wrap text-dark-text leading-relaxed text-base">
                     {response.responseText}
-                  </p>
+                  </div>
                 </div>
               )}
 
               {/* Metadata */}
               {!response.error && (
-                <div className="border-t border-gray-200 pt-4 space-y-3">
+                <div className="border-t border-dark-border pt-4 space-y-3">
                   {response.confidenceScore !== undefined && (
                     <div>
                       <div className="flex justify-between text-sm mb-2">
-                        <span className="text-gray-600 font-medium">Confidence Score</span>
-                        <span className="font-bold text-gray-900">{response.confidenceScore}%</span>
+                        <span className="text-dark-text-muted font-medium">Confidence Score</span>
+                        <span className="font-bold text-dark-text">{response.confidenceScore}%</span>
                       </div>
                       <div className="confidence-bar">
                         <div
@@ -541,21 +559,21 @@ function QueryPageContent() {
                   )}
 
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Response Time</span>
-                    <span className="font-semibold text-gray-900">{(response.responseTimeMs / 1000).toFixed(2)}s</span>
+                    <span className="text-dark-text-muted">Response Time</span>
+                    <span className="font-semibold text-dark-text">{(response.responseTimeMs / 1000).toFixed(2)}s</span>
                   </div>
 
                   {response.tokensUsed && (
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Tokens Used</span>
-                      <span className="font-semibold text-gray-900">{response.tokensUsed.toLocaleString()}</span>
+                      <span className="text-dark-text-muted">Tokens Used</span>
+                      <span className="font-semibold text-dark-text">{response.tokensUsed.toLocaleString()}</span>
                     </div>
                   )}
 
                   {response.sources && response.sources.length > 0 && (
                     <div className="text-sm">
-                      <span className="text-gray-600 font-medium">Sources: </span>
-                      <span className="text-acm-brand font-medium">
+                      <span className="text-dark-text-muted font-medium">Sources: </span>
+                      <span className="text-accent-blue font-medium">
                         {response.sources.join(', ')}
                       </span>
                     </div>
@@ -570,9 +588,12 @@ function QueryPageContent() {
                     navigator.clipboard.writeText(response.responseText);
                     alert('Response copied to clipboard!');
                   }}
-                  className="mt-4 w-full px-4 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-lg text-sm font-semibold transition-all border border-gray-200 hover:border-gray-300"
+                  className="mt-4 w-full px-4 py-2.5 bg-accent-blue hover:bg-accent-blue/90 text-white rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2 shadow-sm hover:shadow-md"
                 >
-                  📋 Copy Response
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  </svg>
+                  Copy Response
                 </button>
               )}
             </div>
@@ -585,14 +606,14 @@ function QueryPageContent() {
         <div className="info-panel mb-8">
           <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
             <div className="flex items-center">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-acm-brand to-acm-brand-dark flex items-center justify-center mr-4 shadow-md">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-accent-blue to-accent-purple flex items-center justify-center mr-4 shadow-md">
                 <span className="text-white text-2xl">🤖</span>
               </div>
               <div>
-                <h3 className="text-xl font-bold text-gray-900">
+                <h3 className="text-xl font-bold text-dark-text">
                   AI-Generated Summary
                 </h3>
-                <p className="text-sm text-gray-600 mt-1">
+                <p className="text-sm text-dark-text-muted mt-1">
                   Condensed analysis from all {responses.filter(r => !r.error).length} model responses
                 </p>
               </div>
@@ -612,25 +633,25 @@ function QueryPageContent() {
 
           {summaryLoading ? (
             <div className="animate-pulse space-y-3">
-              <div className="h-4 bg-acm-brand/20 rounded w-full"></div>
-              <div className="h-4 bg-acm-brand/20 rounded w-5/6"></div>
-              <div className="h-4 bg-acm-brand/20 rounded w-4/6"></div>
+              <div className="h-4 bg-accent-blue/20 rounded w-full"></div>
+              <div className="h-4 bg-accent-blue/20 rounded w-5/6"></div>
+              <div className="h-4 bg-accent-blue/20 rounded w-4/6"></div>
             </div>
           ) : summary ? (
             <div className="prose prose-sm max-w-none">
-              <p className="text-gray-800 leading-relaxed whitespace-pre-wrap bg-white p-5 rounded-lg border border-acm-brand/20 shadow-sm">
+              <p className="text-dark-text leading-relaxed whitespace-pre-wrap bg-dark-surface p-5 rounded-lg border border-dark-border shadow-sm">
                 {summary}
               </p>
             </div>
           ) : (
-            <div className="text-gray-500 text-sm italic">
+            <div className="text-dark-text-muted text-sm italic">
               Generating summary...
             </div>
           )}
 
-          <div className="mt-5 pt-5 border-t border-acm-brand/20">
-            <div className="flex items-center text-xs text-gray-600">
-              <svg className="w-4 h-4 mr-2 text-acm-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="mt-5 pt-5 border-t border-dark-border">
+            <div className="flex items-center text-xs text-dark-text-muted">
+              <svg className="w-4 h-4 mr-2 text-accent-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               This summary synthesizes key insights and consensus points from Claude, GPT-4, Gemini, and Grok responses using Claude API.
@@ -644,20 +665,20 @@ function QueryPageContent() {
         <div className="section-container mb-8">
           <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
             <div className="flex items-center">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-acm-gold to-acm-gold-light flex items-center justify-center mr-4 shadow-md">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-accent-yellow to-accent-orange flex items-center justify-center mr-4 shadow-md">
                 <span className="text-white text-2xl">📜</span>
               </div>
               <div>
-                <h3 className="text-xl font-bold text-gray-900">
+                <h3 className="text-xl font-bold text-dark-text">
                   Patent Intelligence
                 </h3>
-                <p className="text-sm text-gray-600 mt-1">
+                <p className="text-sm text-dark-text-muted mt-1">
                   Relevant patents from Google Patents • {patentCount} results
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <div className="badge badge-acm">
+              <div className="badge badge-warning">
                 <span className="font-bold">{patentCount}</span>
                 <span className="ml-1">patents analyzed by all 4 LLMs</span>
               </div>
@@ -670,9 +691,9 @@ function QueryPageContent() {
             ))}
           </div>
 
-          <div className="mt-6 pt-5 border-t border-gray-200">
-            <div className="flex items-center text-xs text-gray-600">
-              <svg className="w-4 h-4 mr-2 text-acm-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="mt-6 pt-5 border-t border-dark-border">
+            <div className="flex items-center text-xs text-dark-text-muted">
+              <svg className="w-4 h-4 mr-2 text-accent-yellow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               Patent data is automatically fetched from Google Patents and provided as context to all LLM models for IP-aware analysis.
@@ -741,10 +762,10 @@ function QueryPageContent() {
         <div className="section-container">
           <div className="section-header">
             <div>
-              <h3 className="text-xl font-bold text-gray-900">
+              <h3 className="text-xl font-bold text-dark-text">
                 Human Decision & Approval
               </h3>
-              <p className="text-sm text-gray-600 mt-1">
+              <p className="text-sm text-dark-text-muted mt-1">
                 Review all responses and select which LLM's analysis you want to use, or provide your own custom answer.
               </p>
             </div>
@@ -752,12 +773,12 @@ function QueryPageContent() {
 
           <div className="space-y-3 mb-6">
             {responses.filter(r => !r.error).map((response) => (
-              <label key={response.provider} className="flex items-start p-4 border-2 border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 cursor-pointer transition-all">
+              <label key={response.provider} className="flex items-start p-4 border-2 border-dark-border rounded-xl hover:bg-dark-elevated hover:border-accent-blue/50 cursor-pointer transition-all">
                 <input
                   type="radio"
                   name="selected_llm"
                   value={response.provider}
-                  className="mt-1 mr-4 w-4 h-4 text-acm-brand focus:ring-acm-brand"
+                  className="mt-1 mr-4 w-4 h-4 text-accent-blue focus:ring-accent-blue accent-accent-blue"
                 />
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
@@ -765,12 +786,12 @@ function QueryPageContent() {
                       {response.provider}
                     </span>
                     {response.confidenceScore && (
-                      <span className="badge badge-acm text-xs">
+                      <span className="badge badge-primary text-xs">
                         {response.confidenceScore}% confidence
                       </span>
                     )}
                   </div>
-                  <p className="text-sm text-gray-700 line-clamp-3 leading-relaxed">
+                  <p className="text-sm text-dark-text-muted line-clamp-3 leading-relaxed">
                     {response.responseText.substring(0, 250)}...
                   </p>
                 </div>
@@ -780,7 +801,7 @@ function QueryPageContent() {
 
           <textarea
             rows={4}
-            className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-acm-brand focus:border-acm-brand transition-all mb-6"
+            className="w-full px-4 py-3 bg-dark-elevated border-2 border-dark-border text-dark-text rounded-xl focus:ring-2 focus:ring-accent-blue focus:border-accent-blue transition-all mb-6 placeholder:text-dark-text-subtle"
             placeholder="Optional: Add notes or custom analysis..."
           />
 
@@ -806,10 +827,10 @@ export default function QueryPage() {
     <Suspense fallback={
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-1/4 mb-8"></div>
-          <div className="bg-white rounded-lg border border-gray-200 p-6 mb-8">
-            <div className="h-4 bg-gray-200 rounded w-1/3 mb-4"></div>
-            <div className="h-32 bg-gray-200 rounded mb-4"></div>
+          <div className="h-8 bg-dark-elevated rounded w-1/4 mb-8"></div>
+          <div className="bg-dark-surface rounded-lg border border-dark-border p-6 mb-8">
+            <div className="h-4 bg-dark-elevated rounded w-1/3 mb-4"></div>
+            <div className="h-32 bg-dark-elevated rounded mb-4"></div>
           </div>
         </div>
       </div>

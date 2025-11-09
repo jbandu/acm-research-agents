@@ -24,6 +24,12 @@
   --color-accent-red: #ef4444;
   --color-accent-orange: #f97316;
 
+  /* ACM Brand Colors (legacy support) */
+  --color-acm-brand: #4a9eff;
+  --color-acm-brand-dark: #2e5f99;
+  --color-acm-gold: #fbbf24;
+  --color-acm-gold-light: #fcd34d;
+
   /* LLM-specific colors - adjusted for dark theme */
   --color-claude: #6366F1;
   --color-claude-light: #818CF8;
@@ -202,5 +208,81 @@
 
   .compact-grid {
     @apply grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4;
+  }
+
+  /* Dark theme prose (typography) styling */
+  .prose {
+    @apply text-dark-text;
+  }
+
+  .prose h1,
+  .prose h2,
+  .prose h3,
+  .prose h4,
+  .prose h5,
+  .prose h6 {
+    @apply text-white font-semibold;
+  }
+
+  .prose p {
+    @apply text-dark-text leading-relaxed;
+  }
+
+  .prose a {
+    @apply text-accent-blue hover:text-accent-cyan underline;
+  }
+
+  .prose strong {
+    @apply text-white font-semibold;
+  }
+
+  .prose code {
+    @apply bg-dark-elevated text-accent-cyan px-1 py-0.5 rounded text-sm;
+  }
+
+  .prose pre {
+    @apply bg-dark-elevated border border-dark-border rounded-lg p-4 overflow-x-auto;
+  }
+
+  .prose ul,
+  .prose ol {
+    @apply text-dark-text;
+  }
+
+  .prose li {
+    @apply text-dark-text;
+  }
+
+  /* LLM Provider Text Colors - High Contrast for Dark Theme */
+  .text-claude {
+    color: var(--color-claude-light);
+  }
+
+  .text-openai {
+    color: var(--color-openai-light);
+  }
+
+  .text-gemini {
+    color: var(--color-gemini-light);
+  }
+
+  .text-grok {
+    color: var(--color-grok-light);
+  }
+
+  .bg-claude {
+    background-color: var(--color-claude);
+  }
+
+  .bg-openai {
+    background-color: var(--color-openai);
+  }
+
+  .bg-gemini {
+    background-color: var(--color-gemini);
+  }
+
+  .bg-grok {
+    background-color: var(--color-grok);
   }
 }
