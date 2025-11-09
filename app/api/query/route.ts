@@ -7,8 +7,8 @@ import { searchWorks, OpenAlexWork, SearchFilters, createOpenAlexContext } from 
 
 export async function POST(request: NextRequest) {
   try {
-    // Require authentication
-    const user = await requireAuth();
+    // Authentication disabled - allow anonymous queries
+    // const user = await requireAuth();
 
     const body = await request.json();
     const { query_text, workflow_id, system_prompt } = body;
@@ -54,10 +54,10 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Create query record
+    // Create query record (user_id set to null for anonymous queries)
     const queryResult = await query(
       'INSERT INTO queries (query_text, workflow_id, user_id, status) VALUES ($1, $2, $3, $4) RETURNING id',
-      [query_text, workflow_id, user.id, 'processing']
+      [query_text, workflow_id, null, 'processing']
     );
 
     const queryId = queryResult.rows[0].id;
