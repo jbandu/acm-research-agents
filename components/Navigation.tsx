@@ -50,7 +50,7 @@ export default function Navigation() {
     setIsMobileMenuOpen(false);
   };
 
-  // Don't show navigation on auth pages (check AFTER all hooks)
+  // Don't show navigation on auth pages
   if (pathname?.startsWith('/auth/')) {
     return null;
   }
@@ -60,320 +60,252 @@ export default function Navigation() {
       {/* Mobile Menu Overlay - Only visible on mobile when menu is open */}
       {isMobileMenuOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+          className="fixed inset-0 bg-black bg-opacity-60 z-40 md:hidden"
           onClick={closeMobileMenu}
           aria-hidden="true"
         />
       )}
 
-      <nav className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            {/* Left side: Logo and Desktop Navigation */}
-            <div className="flex">
-              {/* Hamburger Menu Button - Mobile Only */}
-              {status === 'authenticated' && (
-                <button
-                  onClick={toggleMobileMenu}
-                  className="md:hidden inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-acm-brand hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-acm-brand mr-2"
-                  aria-label="Toggle menu"
-                  aria-expanded={isMobileMenuOpen}
-                >
-                  {/* Hamburger Icon */}
-                  <svg
-                    className="h-6 w-6"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    {isMobileMenuOpen ? (
-                      // X icon when menu is open
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    ) : (
-                      // Hamburger icon when menu is closed
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                    )}
-                  </svg>
-                </button>
-              )}
+      {/* Palantir-style Top Header */}
+      <header className="fixed top-0 left-0 right-0 h-14 bg-dark-surface border-b border-dark-border z-50 backdrop-blur-sm bg-opacity-95">
+        <div className="h-full flex items-center justify-between px-6">
+          {/* Left: Hamburger + Logo */}
+          <div className="flex items-center space-x-3">
+            {/* Hamburger Menu Button - Mobile Only */}
+            <button
+              onClick={toggleMobileMenu}
+              className="md:hidden inline-flex items-center justify-center p-2 rounded-md text-dark-text-muted hover:text-accent-blue hover:bg-dark-elevated focus:outline-none focus:ring-2 focus:ring-accent-blue/50"
+              aria-label="Toggle menu"
+              aria-expanded={isMobileMenuOpen}
+            >
+              <svg
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                {isMobileMenuOpen ? (
+                  // X icon when menu is open
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                ) : (
+                  // Hamburger icon when menu is closed
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                )}
+              </svg>
+            </button>
 
-              <Link href="/" className="flex items-center">
-                <span className="text-xl font-bold bg-gradient-to-r from-acm-brand to-acm-brand-dark bg-clip-text text-transparent">
-                  ACM Research Agents
-                </span>
-              </Link>
+            {/* Logo */}
+            <Link href="/" className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-gradient-to-br from-accent-blue to-accent-cyan rounded-md flex items-center justify-center">
+                <span className="text-white font-bold text-sm">AR</span>
+              </div>
+              <span className="text-lg font-semibold text-dark-text tracking-tight">
+                ACM Research Agents
+              </span>
+            </Link>
+          </div>
 
-              {/* Desktop Navigation - Hidden on mobile (< 768px) */}
-              {status === 'authenticated' && (
-                <div className="hidden md:ml-10 md:flex md:items-center md:space-x-1">
-                  {/* Research Section */}
-                  <Link
-                    href="/query"
-                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                      pathname === '/query'
-                        ? 'text-acm-brand bg-acm-blue-lightest'
-                        : 'text-acm-text-default hover:text-acm-brand hover:bg-acm-gray-lightest'
-                    }`}
-                  >
-                    🔬 New Query
-                  </Link>
-
-                <Link
-                  href="/workflows"
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                    pathname === '/workflows'
-                      ? 'text-acm-brand bg-acm-blue-lightest'
-                      : 'text-acm-text-default hover:text-acm-brand hover:bg-acm-gray-lightest'
-                  }`}
-                >
-                  📋 Workflows
-                </Link>
-
-                <Link
-                  href="/history"
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                    pathname === '/history'
-                      ? 'text-acm-brand bg-acm-blue-lightest'
-                      : 'text-acm-text-default hover:text-acm-brand hover:bg-acm-gray-lightest'
-                  }`}
-                >
-                  📊 History
-                </Link>
-
-                <Link
-                  href="/ontology"
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                    pathname === '/ontology'
-                      ? 'text-acm-brand bg-acm-blue-lightest'
-                      : 'text-acm-text-default hover:text-acm-brand hover:bg-acm-gray-lightest'
-                  }`}
-                >
-                  🕸️ Knowledge Graph
-                </Link>
-
-                <Link
-                  href="/competitors"
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                    pathname === '/competitors'
-                      ? 'text-acm-brand bg-acm-blue-lightest'
-                      : 'text-acm-text-default hover:text-acm-brand hover:bg-acm-gray-lightest'
-                  }`}
-                >
-                  🗺️ Competitor Map
-                </Link>
-
-                {/* Admin Dropdown (only for admins) */}
+          {/* Right: User Info */}
+          <div className="flex items-center space-x-4">
+            {status === 'authenticated' && (
+              <div className="flex items-center space-x-3">
+                <div className="text-sm text-dark-text-muted hidden sm:block">
+                  {String(session.user?.name || session.user?.email || 'User')}
+                </div>
                 {isAdmin && (
-                  <div className="relative" ref={adminRef}>
-                    <button
-                      onClick={() => setIsAdminOpen(!isAdminOpen)}
-                      className={`px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center ${
-                        pathname?.startsWith('/admin')
-                          ? 'text-acm-gold bg-amber-50'
-                          : 'text-acm-text-default hover:text-acm-gold hover:bg-acm-gray-lightest'
-                      }`}
-                    >
-                      ⚙️ Admin
-                      <svg className={`ml-1 h-4 w-4 transition-transform ${isAdminOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </button>
-
-                    {isAdminOpen && (
-                      <div className="absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
-                        <div className="py-1">
-                          <Link
-                            href="/admin/migrate"
-                            className="block px-4 py-2 text-sm text-black hover:bg-amber-50 hover:text-acm-gold"
-                            onClick={() => setIsAdminOpen(false)}
-                          >
-                            <span className="flex items-center">
-                              <span className="mr-2">🗄️</span>
-                              Database Migration
-                            </span>
-                          </Link>
-                          <Link
-                            href="/admin/intelligence"
-                            className="block px-4 py-2 text-sm text-black hover:bg-amber-50 hover:text-acm-gold"
-                            onClick={() => setIsAdminOpen(false)}
-                          >
-                            <span className="flex items-center">
-                              <span className="mr-2">🤖</span>
-                              Intelligence Dashboard
-                            </span>
-                          </Link>
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                  <span className="px-2 py-0.5 bg-accent-yellow/10 text-accent-yellow text-xs rounded-md border border-accent-yellow/30 font-medium uppercase tracking-wide">
+                    Admin
+                  </span>
                 )}
               </div>
             )}
           </div>
+        </div>
+      </header>
 
-          <div className="flex items-center space-x-4">
-            {status === 'loading' ? (
-              <div className="text-sm text-gray-500">Loading...</div>
-            ) : status === 'authenticated' ? (
+      {/* Palantir-style Left Sidebar Navigation */}
+      {/* Mobile: Slide in from left when open, Desktop: Always visible */}
+      <aside className={`fixed left-0 top-14 bottom-0 w-56 bg-dark-elevated border-r border-dark-border z-40 transform transition-transform duration-300 ease-in-out ${
+        isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+      }`}>
+        <nav className="flex flex-col h-full py-4">
+          <div className="flex-1 space-y-1 px-3 overflow-y-auto">
+            <Link
+              href="/query"
+              onClick={closeMobileMenu}
+              className={`flex items-center px-3 py-2.5 rounded-md text-sm font-medium transition-all duration-150 ${
+                pathname === '/query'
+                  ? 'text-accent-blue bg-accent-blue/10 border border-accent-blue/30'
+                  : 'text-dark-text-muted hover:text-dark-text hover:bg-dark-surface border border-transparent'
+              }`}
+            >
+              <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+              <span>New Query</span>
+            </Link>
+
+            <Link
+              href="/workflows"
+              onClick={closeMobileMenu}
+              className={`flex items-center px-3 py-2.5 rounded-md text-sm font-medium transition-all duration-150 ${
+                pathname === '/workflows'
+                  ? 'text-accent-blue bg-accent-blue/10 border border-accent-blue/30'
+                  : 'text-dark-text-muted hover:text-dark-text hover:bg-dark-surface border border-transparent'
+              }`}
+            >
+              <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+              <span>Workflows</span>
+            </Link>
+
+            <Link
+              href="/history"
+              onClick={closeMobileMenu}
+              className={`flex items-center px-3 py-2.5 rounded-md text-sm font-medium transition-all duration-150 ${
+                pathname === '/history'
+                  ? 'text-accent-blue bg-accent-blue/10 border border-accent-blue/30'
+                  : 'text-dark-text-muted hover:text-dark-text hover:bg-dark-surface border border-transparent'
+              }`}
+            >
+              <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span>History</span>
+            </Link>
+
+            <Link
+              href="/ontology"
+              onClick={closeMobileMenu}
+              className={`flex items-center px-3 py-2.5 rounded-md text-sm font-medium transition-all duration-150 ${
+                pathname === '/ontology'
+                  ? 'text-accent-blue bg-accent-blue/10 border border-accent-blue/30'
+                  : 'text-dark-text-muted hover:text-dark-text hover:bg-dark-surface border border-transparent'
+              }`}
+            >
+              <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+              </svg>
+              <span>Knowledge Graph</span>
+            </Link>
+
+            <Link
+              href="/competitors"
+              onClick={closeMobileMenu}
+              className={`flex items-center px-3 py-2.5 rounded-md text-sm font-medium transition-all duration-150 ${
+                pathname === '/competitors'
+                  ? 'text-accent-blue bg-accent-blue/10 border border-accent-blue/30'
+                  : 'text-dark-text-muted hover:text-dark-text hover:bg-dark-surface border border-transparent'
+              }`}
+            >
+              <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+              <span>Competitor Map</span>
+            </Link>
+
+            {/* Admin Section */}
+            {isAdmin && (
               <>
-                <span className="text-sm text-acm-text-default flex items-center">
-                  <span className="hidden sm:inline">{String(session.user?.name || session.user?.email || 'User')}</span>
-                  {isAdmin && (
-                    <span className="ml-2 px-2 py-0.5 bg-gradient-to-r from-amber-100 to-yellow-100 text-acm-gold text-xs rounded-full font-medium">
-                      Admin
-                    </span>
+                <div className="h-px bg-dark-border my-2"></div>
+                <div ref={adminRef}>
+                  <button
+                    onClick={() => setIsAdminOpen(!isAdminOpen)}
+                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-md text-sm font-medium transition-all duration-150 ${
+                      pathname?.startsWith('/admin')
+                        ? 'text-accent-yellow bg-accent-yellow/10 border border-accent-yellow/30'
+                        : 'text-dark-text-muted hover:text-dark-text hover:bg-dark-surface border border-transparent'
+                    }`}
+                  >
+                    <div className="flex items-center">
+                      <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      <span>Admin</span>
+                    </div>
+                    <svg
+                      className={`h-4 w-4 transition-transform ${isAdminOpen ? 'rotate-180' : ''}`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+
+                  {isAdminOpen && (
+                    <div className="ml-8 mt-1 space-y-1">
+                      <Link
+                        href="/admin/migrate"
+                        className="flex items-center px-3 py-2 rounded-md text-sm text-dark-text-muted hover:text-dark-text hover:bg-dark-surface transition-colors"
+                        onClick={() => {
+                          setIsAdminOpen(false);
+                          closeMobileMenu();
+                        }}
+                      >
+                        Database Migration
+                      </Link>
+                      <Link
+                        href="/admin/intelligence"
+                        className="flex items-center px-3 py-2 rounded-md text-sm text-dark-text-muted hover:text-dark-text hover:bg-dark-surface transition-colors"
+                        onClick={() => {
+                          setIsAdminOpen(false);
+                          closeMobileMenu();
+                        }}
+                      >
+                        Intelligence Dashboard
+                      </Link>
+                      <Link
+                        href="/admin/settings"
+                        className="flex items-center px-3 py-2 rounded-md text-sm text-dark-text-muted hover:text-dark-text hover:bg-dark-surface transition-colors"
+                        onClick={() => {
+                          setIsAdminOpen(false);
+                          closeMobileMenu();
+                        }}
+                      >
+                        Provider Settings
+                      </Link>
+                    </div>
                   )}
-                </span>
-                <button
-                  onClick={() => signOut({ callbackUrl: '/auth/signin' })}
-                  className="text-sm text-acm-text-default hover:text-red-600 px-3 py-2 rounded-md font-medium transition-colors"
-                >
-                  Sign Out
-                </button>
+                </div>
               </>
+            )}
+          </div>
+
+          {/* Bottom Actions */}
+          <div className="border-t border-dark-border pt-3 px-3 space-y-1">
+            {status === 'authenticated' ? (
+              <button
+                onClick={() => {
+                  closeMobileMenu();
+                  signOut({ callbackUrl: '/auth/signin' });
+                }}
+                className="w-full flex items-center px-3 py-2.5 rounded-md text-sm font-medium text-dark-text-muted hover:text-accent-red hover:bg-accent-red/10 transition-all duration-150 border border-transparent hover:border-accent-red/30"
+              >
+                <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                <span>Sign Out</span>
+              </button>
             ) : (
               <Link
                 href="/auth/signin"
-                className="text-sm font-medium px-4 py-2 rounded-md bg-gradient-to-r from-acm-brand to-acm-brand-dark text-white hover:from-acm-brand-dark hover:to-acm-brand transition-all shadow-sm"
+                className="w-full flex items-center justify-center px-3 py-2.5 rounded-md text-sm font-medium text-white bg-gradient-to-br from-accent-blue to-accent-blue-dim hover:from-accent-blue-dim hover:to-accent-blue transition-all border border-accent-blue/30"
               >
                 Sign In
               </Link>
             )}
           </div>
-          </div>
-        </div>
+        </nav>
+      </aside>
 
-        {/* Mobile Slide-in Menu - Only visible on mobile (< 768px) */}
-        {status === 'authenticated' && (
-          <div
-            className={`fixed top-16 left-0 bottom-0 w-64 bg-white shadow-2xl transform transition-transform duration-300 ease-in-out z-50 md:hidden ${
-              isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
-            }`}
-          >
-            {/* Mobile Navigation Items */}
-            <div className="flex flex-col h-full overflow-y-auto py-4">
-              {/* Research Section Links */}
-              <Link
-                href="/query"
-                onClick={closeMobileMenu}
-                className={`px-6 py-3 text-base font-medium transition-colors border-l-4 ${
-                  pathname === '/query'
-                    ? 'text-acm-brand bg-acm-blue-lightest border-acm-brand'
-                    : 'text-acm-text-default hover:text-acm-brand hover:bg-acm-gray-lightest border-transparent'
-                }`}
-              >
-                🔬 New Query
-              </Link>
-
-              <Link
-                href="/workflows"
-                onClick={closeMobileMenu}
-                className={`px-6 py-3 text-base font-medium transition-colors border-l-4 ${
-                  pathname === '/workflows'
-                    ? 'text-acm-brand bg-acm-blue-lightest border-acm-brand'
-                    : 'text-acm-text-default hover:text-acm-brand hover:bg-acm-gray-lightest border-transparent'
-                }`}
-              >
-                📋 Workflows
-              </Link>
-
-              <Link
-                href="/history"
-                onClick={closeMobileMenu}
-                className={`px-6 py-3 text-base font-medium transition-colors border-l-4 ${
-                  pathname === '/history'
-                    ? 'text-acm-brand bg-acm-blue-lightest border-acm-brand'
-                    : 'text-acm-text-default hover:text-acm-brand hover:bg-acm-gray-lightest border-transparent'
-                }`}
-              >
-                📊 History
-              </Link>
-
-              <Link
-                href="/ontology"
-                onClick={closeMobileMenu}
-                className={`px-6 py-3 text-base font-medium transition-colors border-l-4 ${
-                  pathname === '/ontology'
-                    ? 'text-acm-brand bg-acm-blue-lightest border-acm-brand'
-                    : 'text-acm-text-default hover:text-acm-brand hover:bg-acm-gray-lightest border-transparent'
-                }`}
-              >
-                🕸️ Knowledge Graph
-              </Link>
-
-              <Link
-                href="/competitors"
-                onClick={closeMobileMenu}
-                className={`px-6 py-3 text-base font-medium transition-colors border-l-4 ${
-                  pathname === '/competitors'
-                    ? 'text-acm-brand bg-acm-blue-lightest border-acm-brand'
-                    : 'text-acm-text-default hover:text-acm-brand hover:bg-acm-gray-lightest border-transparent'
-                }`}
-              >
-                🗺️ Competitor Map
-              </Link>
-
-              {/* Admin Section (mobile) - Only for admins */}
-              {isAdmin && (
-                <>
-                  <div className="px-6 py-3 text-sm font-semibold text-gray-500 uppercase tracking-wider border-t border-gray-200 mt-4 pt-4">
-                    Admin
-                  </div>
-                  <Link
-                    href="/admin/migrate"
-                    onClick={closeMobileMenu}
-                    className={`px-6 py-3 text-base font-medium transition-colors border-l-4 ${
-                      pathname === '/admin/migrate'
-                        ? 'text-acm-gold bg-amber-50 border-acm-gold'
-                        : 'text-acm-text-default hover:text-acm-gold hover:bg-amber-50 border-transparent'
-                    }`}
-                  >
-                    <span className="flex items-center">
-                      <span className="mr-2">🗄️</span>
-                      Database Migration
-                    </span>
-                  </Link>
-                  <Link
-                    href="/admin/intelligence"
-                    onClick={closeMobileMenu}
-                    className={`px-6 py-3 text-base font-medium transition-colors border-l-4 ${
-                      pathname === '/admin/intelligence'
-                        ? 'text-acm-gold bg-amber-50 border-acm-gold'
-                        : 'text-acm-text-default hover:text-acm-gold hover:bg-amber-50 border-transparent'
-                    }`}
-                  >
-                    <span className="flex items-center">
-                      <span className="mr-2">🤖</span>
-                      Intelligence Dashboard
-                    </span>
-                  </Link>
-                </>
-              )}
-
-              {/* User Info Section at bottom of mobile menu */}
-              <div className="mt-auto px-6 py-4 border-t border-gray-200">
-                <div className="text-sm text-gray-700 mb-2">
-                  {String(session?.user?.name || session?.user?.email || 'User')}
-                  {isAdmin && (
-                    <span className="ml-2 px-2 py-0.5 bg-gradient-to-r from-amber-100 to-yellow-100 text-acm-gold text-xs rounded-full font-medium">
-                      Admin
-                    </span>
-                  )}
-                </div>
-                <button
-                  onClick={() => {
-                    closeMobileMenu();
-                    signOut({ callbackUrl: '/auth/signin' });
-                  }}
-                  className="w-full text-left text-sm text-red-600 hover:text-red-800 font-medium py-2"
-                >
-                  Sign Out
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-      </nav>
+      {/* Main Content Spacer - Prevents overlap with fixed navigation */}
+      {/* Mobile: Only top padding, Desktop: Top + left padding */}
+      <div className="pt-14 md:pl-56">
+        {/* This spacer ensures content doesn't overlap with fixed navigation */}
+      </div>
     </>
   );
 }
